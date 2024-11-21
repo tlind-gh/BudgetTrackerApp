@@ -1,0 +1,28 @@
+package budgerTrackerProgram;
+
+public class TransactionSystem {
+}
+
+
+public void newTransaction(int month, int day, double amount, int categoryNr) {
+    try {
+        Date date = new Date(2024, month, day);
+    } catch
+    if (amount > 0) {
+        if (categoryNr < 0 || categoryNr > EIncomeCategory.values().length) {
+            System.out.println("Category index not valid. Category set to OTHER");
+            categoryNr = (EIncomeCategory.values().length - 1);
+        }
+        Income income = new Income(nextTransactionID, dateOfTransaction, amount, categoryNr);
+        incomeArrayList.add(income);
+    } else if (amount < 0) {
+        if (categoryNr < 0 || categoryNr > EExpenseCategory.values().length) {
+            System.out.println("Category index not valid. Category set to OTHER");
+            categoryNr = (EExpenseCategory.values().length - 1);
+        }
+        Expense expense = new Expense(nextTransactionID, dateOfTransaction, amount, categoryNr);
+        expenseArrayList.add(expense);
+    } else {
+        System.out.println("Transaction amount cannot be zero.");
+    }
+}
