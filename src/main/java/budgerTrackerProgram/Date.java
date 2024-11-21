@@ -2,12 +2,12 @@ package budgerTrackerProgram;
 
 public class Date {
     //custom date class since I had a hard time figuring out how to parse LocalDate for storing to json
-    //year is hard coded as this program only handles one calender year
+    //year is hard coded to 2024 as this program only handles one calendar year
     final private int year = 2024;
     final private int month;
     final private int day;
 
-    //constructor for date, only allowing valid dates for 2024.
+    //constructor for date, only allowing valid dates (and throws exception for non-valid dates)
     public Date(int month, int day) {
         if (day > 0 && day < 32 && month > 0 && month < 13) {
             switch (month) {
@@ -35,10 +35,8 @@ public class Date {
         return year + "-" + String.format("%02d", month) + "-" + String.format("%02d", day);
     }
 
-    public int getMonth() {
-        return month;
-    }
 
+    //Static method to get a month in letters for digits (e.g., "January" from 1)
     public static String getMonthAsString(int month) {
         String monthString = null;
         switch (month) {
@@ -80,10 +78,6 @@ public class Date {
                 break;
         }
         return monthString;
-    }
-
-    public int getDay() {
-        return day;
     }
 
 }

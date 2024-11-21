@@ -14,20 +14,20 @@ public class TransactionSystem {
         nextTransactionID = 1;
     }
 
-
     public void newTransaction(int month, int day, double amount, int categoryNr) {
         Date date = new Date(month, day);
         String id = String.format("%02d%02d", month, nextTransactionID);
-        if (amount > 0) {
-            Income income = new Income(("I"+id), date, amount, categoryNr);
-            transactionStorage.addTransaction(income, month);
-            nextTransactionID +=1;
-            System.out.println("Transaction added successfully\n"+income);
-        } else if (amount < 0) {
-            Expense expense = new Expense(("E"+id), date, amount, categoryNr);
-            transactionStorage.addTransaction(expense, month);
-            nextTransactionID +=1;
-            System.out.println("Transaction added successfully\n"+expense);
+        if (amount != 0) {
+            if (amount > 0) {
+                Income transaction = new Income(("I"+id), date, amount, categoryNr);
+                transactionStorage.addTransaction(transaction, month);
+                System.out.println("Transaction added successfully\n"+ transaction);
+            } else {
+                Expense transaction = new Expense(("E" + id), date, amount, categoryNr);
+                transactionStorage.addTransaction(transaction, month);
+                System.out.println("Transaction added successfully\n"+ transaction);
+            }
+            nextTransactionID += 1;
         } else {
             System.out.println("Transaction amount cannot be zero.");
         }
@@ -47,9 +47,6 @@ public class TransactionSystem {
         }
     }
 
-
-
-
     public void printTransactions(int month, int choice) {
         if(month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
             if (month == 0) {
@@ -58,10 +55,10 @@ public class TransactionSystem {
                 double incomeSumMonth = 0;
                 double expenseSumMonth = 0;
                 if (choice == 1 || choice == 3) {
-                    incomeSumMonth = printIncomeMonthReturnSum(month);
+                    incomeSumMonth = printMonthReturnSum(month, transactionStorage.getIncomeDataMonth(month),"income");
                 }
                 if (choice == 2 || choice == 3) {
-                    expenseSumMonth = printExpenseMonthReturnSum(month);
+                    expenseSumMonth = printMonthReturnSum(month, transactionStorage.getExpenseDataMonth(month),"expense");
                 }
                 if (choice == 3) {
                     System.out.println("TOTAL BALANCE" + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth - expenseSumMonth));
@@ -77,24 +74,25 @@ public class TransactionSystem {
         double expenseSumYear = 0;
         if (choice == 1 || choice == 3) {
             for (int i = 1; i <= 12; i++) {
-                incomeSumYear += printIncomeMonthReturnSum(i);
+                incomeSumYear += printMonthReturnSum(i, transactionStorage.getIncomeDataMonth(i),"income");
             }
             System.out.println("TOTAL INCOME 2024: " + incomeSumYear);
             System.out.println("-------------");
         }
         if (choice == 2 || choice == 3) {
             for (int i = 1; i <= 12; i++) {
-                expenseSumYear += printExpenseMonthReturnSum(i);
+                expenseSumYear += printMonthReturnSum(i, transactionStorage.getIncomeDataMonth(i),"expense");
                 System.out.println("-------------");
             }
             System.out.println("TOTAL INCOME 2024: " + expenseSumYear);
             System.out.println("-------------");
         }
         if (choice == 3) {
-            System.out.println("TOTAL BALANCE 2024" + +(incomeSumYear - expenseSumYear));
+            System.out.println("TOTAL BALANCE 2024" + (incomeSumYear - expenseSumYear));
         }
     }
 
+    /*
     private double printIncomeMonthReturnSum(int month) {
         List<Income> incomeList = transactionStorage.getIncomeDataMonth(month);
         double incomeSum = 0;
@@ -129,6 +127,25 @@ public class TransactionSystem {
         }
         System.out.println("-------------");
         return expenseSum;
+    }
+
+    */
+
+    private double printMonthReturnSum(int month, List<? extends Transaction> transactionList, String type) {
+        double transactionSum = 0;
+        System.out.println(Date.getMonthAsString(month).toUpperCase()+" - "+type.toUpperCase());
+        if (!transactionList.isEmpty()) {
+            System.out.println("Date\t\t\tAmount\t\tCategory\t\tTransaction id");
+            for (Transaction transaction : transactionList) {
+                System.out.println(transaction);
+                transactionSum += transaction.getAmount();
+            }
+            System.out.println(Date.getMonthAsString(month) + "total "+ type +": "+ transactionSum);
+        } else {
+            System.out.println("No transactions");
+        }
+        System.out.println("-------------");
+        return transactionSum;
     }
 
     public void closeSystem() {

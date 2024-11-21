@@ -2,7 +2,7 @@ package budgerTrackerProgram;
 
 import java.util.Scanner;
 
-public class Main {
+public class BudgetTracker {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         User defaultUser = new User(1, "Test", "User");
