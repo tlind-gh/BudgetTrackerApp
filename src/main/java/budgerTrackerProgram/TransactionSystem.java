@@ -3,29 +3,110 @@ package budgerTrackerProgram;
 import java.util.List;
 
 public class TransactionSystem {
-
     private long nextTransactionID;
     private final TransactionStorage transactionStorage;
 
     public TransactionSystem(User user) {
+
         transactionStorage = new TransactionStorage(user);
 
         //change, should be read from file.
         nextTransactionID = 1;
     }
 
-    public void newTransaction(int month, int day, double amount, int categoryNr) {
-        Date date = new Date(month, day);
-        String id = String.format("%02d%02d", month, nextTransactionID);
+    public void changeTransaction(long id, Date date) {
+        Transaction transaction = searchTransactionByID(id, true);
+        if (transaction == null) {
+            transaction = searchTransactionByID(id, false);
+        }
+        if (transaction != null) {
+            transaction.setDate(date);
+            System.out.println("Date of transaction changed:\n"+transaction);
+        } else {
+            System.out.println("Not a valid id");
+        }
+    }
+
+    public void changeTransaction(long id, double amount) {
+        Transaction transaction = searchTransactionByID(id, true);
+        if (transaction == null) {
+            transaction = searchTransactionByID(id, false);
+        }
+        if (transaction != null) {
+            try {
+                transaction.setAmount(amount);
+                System.out.println("Amount of transaction changed:\n" + transaction);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Not a valid amount for the transaction type");
+            }
+        } else {
+            System.out.println("Not a valid id");
+        }
+    }
+
+    public void deleteTransaction(long id) {
+        Transaction transaction = searchTransactionByID(id, true);
+        if (transaction != null) {
+            transactionStorage.getIncomeDataMonth(transaction.getDate().getMonth()).remove(transaction);
+            System.out.println("Transcation deleted");
+        } else {
+            transaction = searchTransactionByID(id, false);
+            if (transaction != null) {
+                transactionStorage.getExpenseDataMonth(transaction.getDate().getMonth()).remove(transaction);
+                System.out.println("Transcation deleted");
+            } else {
+                System.out.println("Not a valid id");
+            }
+        }
+    }
+
+    private Transaction searchTransactionByID(long id, boolean isIncome) {
+        Transaction transaction = null;
+        boolean isFound = false;
+        //List<? extends Transaction> transactionList = (id.charAt(0) == 'I' || id.charAt(0) =='i') ?
+        for (int i = 1; i <= 12; i++) {
+            if (isFound){
+                break;
+            }
+            List<? extends Transaction> transactionList = isIncome ?
+                    transactionStorage.getIncomeDataMonth(i) :
+                    transactionStorage.getExpenseDataMonth(i);
+            for (Transaction t : transactionList) {
+                if (t.getId() == id) {
+                    transaction = t;
+                    isFound = true;
+                    break;
+                }
+            }
+        }
+        if (isFound) {
+            System.out.println("Transaction found:\n" + transaction);
+        } else {
+            System.out.println("No transaction with that ID");
+        }
+        return transaction;
+    }
+
+    public Date createDate(int month, int day) {
+        Date date = null;
+        try {
+            date = new Date(month, day);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Not a valid date");
+        }
+        return date;
+    }
+
+    public void newTransaction(Date date, double amount, int categoryNr) {
         if (amount != 0) {
             if (amount > 0) {
-                Income transaction = new Income(("I"+id), date, amount, categoryNr);
-                transactionStorage.addTransaction(transaction, month);
-                System.out.println("Transaction added successfully\n"+ transaction);
+                Income income = new Income(nextTransactionID, date, amount, categoryNr);
+                transactionStorage.getIncomeDataMonth(date.getMonth()).add(income);
+                System.out.println("Transaction added successfully\n"+ income);
             } else {
-                Expense transaction = new Expense(("E" + id), date, amount, categoryNr);
-                transactionStorage.addTransaction(transaction, month);
-                System.out.println("Transaction added successfully\n"+ transaction);
+                Expense expense = new Expense(nextTransactionID, date, amount, categoryNr);
+                transactionStorage.getExpenseDataMonth(date.getMonth()).add(expense);
+                System.out.println("Transaction added successfully\n"+ expense);
             }
             nextTransactionID += 1;
         } else {
@@ -69,6 +150,23 @@ public class TransactionSystem {
         }
     }
 
+    public void printTransactions(Date date) {
+        int month = date.getMonth();
+        boolean isFound = false;
+        for (Transaction t : transactionStorage.getIncomeDataMonth(month)) {
+            if (date.getDay() == t.getDate().getDay()) {
+                System.out.println(t);
+                isFound = true;
+            }
+        }
+        for (Transaction t : transactionStorage.getExpenseDataMonth(month)) {
+            if (date.getDay() == t.getDate().getDay()) {
+                System.out.println(t);
+                isFound = true;
+            }
+        }
+    }
+
     private void printTransactionsYear(int choice) {
         double incomeSumYear = 0;
         double expenseSumYear = 0;
@@ -92,45 +190,6 @@ public class TransactionSystem {
         }
     }
 
-    /*
-    private double printIncomeMonthReturnSum(int month) {
-        List<Income> incomeList = transactionStorage.getIncomeDataMonth(month);
-        double incomeSum = 0;
-        System.out.println(Date.getMonthAsString(month).toUpperCase()+" - INCOME");
-        if (!incomeList.isEmpty()) {
-            System.out.println("Date\t\t\tAmount\t\tCategory\t\tTransaction id");
-            for (Transaction transaction : incomeList) {
-                System.out.println(transaction);
-                incomeSum += transaction.getAmount();
-            }
-            System.out.println(Date.getMonthAsString(month) +"total income: "+incomeSum);
-        } else {
-            System.out.println("No transactions");
-        }
-        System.out.println("-------------");
-        return incomeSum;
-    }
-
-    private double printExpenseMonthReturnSum(int month) {
-        List<Expense> expenseList = transactionStorage.getExpenseDataMonth(month);
-        double expenseSum = 0;
-        System.out.println(Date.getMonthAsString(month).toUpperCase()+" - EXPENSE");
-        if (!expenseList.isEmpty()) {
-            System.out.println("Date\t\t\tAmount\t\tCategory\t\tTransaction id");
-            for (Transaction transaction : expenseList) {
-                System.out.println(transaction);
-                expenseSum += transaction.getAmount();
-            }
-            System.out.println(Date.getMonthAsString(month) + "total expenses: "+ expenseSum);
-        } else {
-            System.out.println("No transactions");
-        }
-        System.out.println("-------------");
-        return expenseSum;
-    }
-
-    */
-
     private double printMonthReturnSum(int month, List<? extends Transaction> transactionList, String type) {
         double transactionSum = 0;
         System.out.println(Date.getMonthAsString(month).toUpperCase()+" - "+type.toUpperCase());
@@ -151,7 +210,4 @@ public class TransactionSystem {
     public void closeSystem() {
         transactionStorage.writeToFile();
     }
-
 }
-
-

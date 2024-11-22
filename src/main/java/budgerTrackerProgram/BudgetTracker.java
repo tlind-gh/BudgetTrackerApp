@@ -37,16 +37,21 @@ public class BudgetTracker {
                 case 2:
                     System.out.println("-------------");
                     System.out.println("ADD TRANSACTION");
-                    System.out.print("Choose date:  Month: ");
+                    System.out.print("Choose date\nMonth: ");
                     month = sc.nextInt();
-                    System.out.print("  Day: ");
-                    int day = sc.nextInt();
-                    System.out.print("Amount (positive number for income, negative number for expense): ");
-                    double amount = sc.nextDouble();
-                    System.out.println("Choose category: ");
-                    transactionSystem.printTransactionCategories(amount);
-                    int category = sc.nextInt();
-                    transactionSystem.newTransaction(month, day, amount, category);
+                    System.out.print("\nDay: ");
+                    Date date = transactionSystem.createDate(month, sc.nextInt());
+                    if (date == null) {
+                        System.out.println("Returned to main menu due to invalid input.");
+                        break;
+                    } else {
+                        System.out.print("Amount (positive number for income, negative number for expense): ");
+                        double amount = sc.nextDouble();
+                        System.out.println("Choose category: ");
+                        transactionSystem.printTransactionCategories(amount);
+                        int category = sc.nextInt();
+                        transactionSystem.newTransaction(date, amount, category);
+                    }
                     break;
 
                 case 3:

@@ -30,6 +30,14 @@ public class Date {
         this.day = day;
     }
 
+    int getMonth() {
+        return month;
+    }
+
+    int getDay() {
+        return day;
+    }
+
     @Override
     public String toString() {
         return year + "-" + String.format("%02d", month) + "-" + String.format("%02d", day);

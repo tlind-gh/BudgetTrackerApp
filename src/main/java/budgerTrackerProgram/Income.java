@@ -4,7 +4,7 @@ public class Income extends Transaction {
     private EIncomeCategory category;
 
     //constructor called by newTransaction() in the TransactionSystem class
-    Income(String id, Date date, double amount, int categoryIndex) {
+    Income(long id, Date date, double amount, int categoryIndex) {
         super(id, date, amount);
         /*does not allow amount to be 0 or negative for Income objects
         (should not be allowed to occur by the newTransaction() method, but this is an extra safe-guard)*/
@@ -28,6 +28,15 @@ public class Income extends Transaction {
 
     EIncomeCategory getCategory() {
         return category;
+    }
+
+    @Override
+    void setAmount(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Income cannot have amount <= 0");
+        } else {
+            this.amount = amount;
+        }
     }
 
     @Override

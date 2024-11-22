@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*TransactionStorage handles reading and writing to file and also holds the income and expense data (in HashMaps)
-an instance of the transactionStorage class is handled via the TransactionSystem class*/
+/*TransactionStorage handles reading and writing to file and also holds the income and expense data (in HashMaps).
+An instance of the transactionStorage class is initiated and handled via the TransactionSystem class*/
 public class TransactionStorage {
     private final Gson gson;
     private final String filepath_root;
@@ -44,7 +44,7 @@ public class TransactionStorage {
             new File(filepath_income).mkdir();
             new File(filepath_expense).mkdir();
         }
-        //local Type variables (necessary for ArraLists with gson) for use with the FileReader
+        //local Type variables (necessary for ArrayLists with gson) for use with the FileReader
         Type listTypeIncome = new TypeToken<ArrayList<Income>>() {}.getType();
         Type listTypeExpense = new TypeToken<ArrayList<Expense>>() {}.getType();
 
@@ -89,17 +89,7 @@ public class TransactionStorage {
         }
     }
 
-    /*adding a new Transaction to the storage, depending on if an Income or an Expense object is provided as an argument
-    it is added to the incomeData or the expenseData by the following two methods. Java chooses the "correct method
-    based on input arguments, this is an example of polymophism*/
-    void addTransaction(Income income, int month) {
-        incomeData.get(month).add(income);
-    }
-
-    void addTransaction(Expense expense, int month) {
-        expenseData.get(month).add(expense);
-    }
-
+    //getters for ArrayList (income or expenses for a specific month), used by the transactionSystem
     List<Income> getIncomeDataMonth(int month) {
         return incomeData.get(month);
     }
