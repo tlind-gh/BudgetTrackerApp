@@ -1,19 +1,40 @@
 package budgerTrackerProgram;
 
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class TransactionSystem {
+    private final String filepath_user;
+    private final IncomeStorage incomeStorage;
+    private final ExpenseStorage expenseStorage;
     private long nextTransactionID;
-    private final TransactionStorage transactionStorage;
 
     public TransactionSystem(User user) {
-
-        transactionStorage = new TransactionStorage(user);
-
-        //change, should be read from file.
-        nextTransactionID = 1;
+        filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
+        File f1 = new File(filepath_user);
+        if (f1.mkdir()) {
+            new File(filepath_user + "/Income").mkdir();
+            new File(filepath_user + "/Expense").mkdir();
+            nextTransactionID = 10;
+        } else {
+            try {
+                File f2 = new File(filepath_user + "/nextTransactionID.txt");
+                Scanner fr = new Scanner(f2);
+                nextTransactionID = fr.nextLong();
+                fr.close();
+            } catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
+        }
+        incomeStorage = new IncomeStorage(user);
+        expenseStorage = new ExpenseStorage(user);
     }
-
+    /*
     public void changeTransaction(long id, Date date) {
         Transaction transaction = searchTransactionByID(id, true);
         if (transaction == null) {
@@ -45,48 +66,9 @@ public class TransactionSystem {
     }
 
     public void deleteTransaction(long id) {
-        Transaction transaction = searchTransactionByID(id, true);
-        if (transaction != null) {
-            transactionStorage.getIncomeDataMonth(transaction.getDate().getMonth()).remove(transaction);
-            System.out.println("Transcation deleted");
-        } else {
-            transaction = searchTransactionByID(id, false);
-            if (transaction != null) {
-                transactionStorage.getExpenseDataMonth(transaction.getDate().getMonth()).remove(transaction);
-                System.out.println("Transcation deleted");
-            } else {
-                System.out.println("Not a valid id");
-            }
-        }
+        if (id )
     }
-
-    private Transaction searchTransactionByID(long id, boolean isIncome) {
-        Transaction transaction = null;
-        boolean isFound = false;
-        //List<? extends Transaction> transactionList = (id.charAt(0) == 'I' || id.charAt(0) =='i') ?
-        for (int i = 1; i <= 12; i++) {
-            if (isFound){
-                break;
-            }
-            List<? extends Transaction> transactionList = isIncome ?
-                    transactionStorage.getIncomeDataMonth(i) :
-                    transactionStorage.getExpenseDataMonth(i);
-            for (Transaction t : transactionList) {
-                if (t.getId() == id) {
-                    transaction = t;
-                    isFound = true;
-                    break;
-                }
-            }
-        }
-        if (isFound) {
-            System.out.println("Transaction found:\n" + transaction);
-        } else {
-            System.out.println("No transaction with that ID");
-        }
-        return transaction;
-    }
-
+    */
     public Date createDate(int month, int day) {
         Date date = null;
         try {
@@ -101,14 +83,14 @@ public class TransactionSystem {
         if (amount != 0) {
             if (amount > 0) {
                 Income income = new Income(nextTransactionID, date, amount, categoryNr);
-                transactionStorage.getIncomeDataMonth(date.getMonth()).add(income);
+                incomeStorage.addTransaction(income);
                 System.out.println("Transaction added successfully\n"+ income);
             } else {
-                Expense expense = new Expense(nextTransactionID, date, amount, categoryNr);
-                transactionStorage.getExpenseDataMonth(date.getMonth()).add(expense);
+                Expense expense = new Expense(nextTransactionID+1, date, amount, categoryNr);
+                expenseStorage.addTransaction(expense);
                 System.out.println("Transaction added successfully\n"+ expense);
             }
-            nextTransactionID += 1;
+            nextTransactionID += 10;
         } else {
             System.out.println("Transaction amount cannot be zero.");
         }
@@ -129,41 +111,39 @@ public class TransactionSystem {
     }
 
     public void printTransactions(int month, int choice) {
-        if(month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
-            if (month == 0) {
-                printTransactionsYear(choice);
-            } else {
-                double incomeSumMonth = 0;
-                double expenseSumMonth = 0;
-                if (choice == 1 || choice == 3) {
-                    incomeSumMonth = printMonthReturnSum(month, transactionStorage.getIncomeDataMonth(month),"income");
-                }
-                if (choice == 2 || choice == 3) {
-                    expenseSumMonth = printMonthReturnSum(month, transactionStorage.getExpenseDataMonth(month),"expense");
-                }
-                if (choice == 3) {
-                    System.out.println("TOTAL BALANCE" + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth - expenseSumMonth));
-                }
-            }
+        if (month >= 1 && month <= 12 && choice >= 1 && choice <= 3) {
+            printTransactionsMonth(month, choice);
+        } else if (month == 0 && choice >= 1 && choice <= 3) {
+            printTransactionsYear(choice);
         } else {
             System.out.println("Input choices not valid");
         }
     }
 
-    public void printTransactions(Date date) {
-        int month = date.getMonth();
-        boolean isFound = false;
-        for (Transaction t : transactionStorage.getIncomeDataMonth(month)) {
-            if (date.getDay() == t.getDate().getDay()) {
-                System.out.println(t);
-                isFound = true;
+    private void printTransactionsMonth(int month, int choice) {
+        double incomeSumMonth = 0;
+        double expenseSumMonth = 0;
+        if (choice == 1 || choice == 3) {
+            incomeSumMonth = incomeStorage.printMonthReturnSum(month);
+            if (incomeSumMonth != 0) {
+                System.out.println("Total income "+Date.getMonthAsString(month).toLowerCase()+": " + incomeSumMonth);
+            } else {
+                System.out.println("No income post in "+Date.getMonthAsString(month).toLowerCase());
             }
+            System.out.println("---------------------------");
         }
-        for (Transaction t : transactionStorage.getExpenseDataMonth(month)) {
-            if (date.getDay() == t.getDate().getDay()) {
-                System.out.println(t);
-                isFound = true;
+        if (choice == 2 || choice == 3) {
+            if (incomeSumMonth != 0) {
+                expenseSumMonth = expenseStorage.printMonthReturnSum(month);
+                System.out.println("Total expenses "+Date.getMonthAsString(month).toLowerCase()+": " + expenseSumMonth);
+            } else {
+                System.out.println("No expense posts in "+Date.getMonthAsString(month).toLowerCase());
             }
+            System.out.println("---------------------------");
+        }
+        if (choice == 3) {
+            System.out.println("TOTAL BALANCE" + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth - expenseSumMonth));
+            System.out.println("---------------------------");
         }
     }
 
@@ -172,42 +152,31 @@ public class TransactionSystem {
         double expenseSumYear = 0;
         if (choice == 1 || choice == 3) {
             for (int i = 1; i <= 12; i++) {
-                incomeSumYear += printMonthReturnSum(i, transactionStorage.getIncomeDataMonth(i),"income");
+                incomeSumYear += incomeStorage.printMonthReturnSum(i);
             }
             System.out.println("TOTAL INCOME 2024: " + incomeSumYear);
-            System.out.println("-------------");
+            System.out.println("---------------------------");
         }
         if (choice == 2 || choice == 3) {
             for (int i = 1; i <= 12; i++) {
-                expenseSumYear += printMonthReturnSum(i, transactionStorage.getIncomeDataMonth(i),"expense");
-                System.out.println("-------------");
+                expenseSumYear += expenseStorage.printMonthReturnSum(i);
             }
-            System.out.println("TOTAL INCOME 2024: " + expenseSumYear);
-            System.out.println("-------------");
+            System.out.println("TOTAL EXPENSES 2024: " + expenseSumYear);
+            System.out.println("---------------------------");
         }
         if (choice == 3) {
-            System.out.println("TOTAL BALANCE 2024" + (incomeSumYear - expenseSumYear));
+            System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear - expenseSumYear));
+            System.out.println("---------------------------");
         }
-    }
-
-    private double printMonthReturnSum(int month, List<? extends Transaction> transactionList, String type) {
-        double transactionSum = 0;
-        System.out.println(Date.getMonthAsString(month).toUpperCase()+" - "+type.toUpperCase());
-        if (!transactionList.isEmpty()) {
-            System.out.println("Date\t\t\tAmount\t\tCategory\t\tTransaction id");
-            for (Transaction transaction : transactionList) {
-                System.out.println(transaction);
-                transactionSum += transaction.getAmount();
-            }
-            System.out.println(Date.getMonthAsString(month) + "total "+ type +": "+ transactionSum);
-        } else {
-            System.out.println("No transactions");
-        }
-        System.out.println("-------------");
-        return transactionSum;
     }
 
     public void closeSystem() {
-        transactionStorage.writeToFile();
+        incomeStorage.writeToFile();
+        expenseStorage.writeToFile();
+        try {
+            Files.write(Paths.get(filepath_user + "/nextTransactionID.txt"), String.valueOf(nextTransactionID).getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
