@@ -13,7 +13,8 @@ public abstract class Transaction {
         this.amount = amount;
     }
 
-    abstract void setCategory(int categoryIndex);
+    void setCategory(int categoryIndex) {
+    }
 
     long getId() {
         return id;

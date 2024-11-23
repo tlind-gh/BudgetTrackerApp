@@ -5,22 +5,26 @@ import java.util.Scanner;
 public class BudgetTracker {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+
+        //hard coded user
         User defaultUser = new User(1, "Test", "User");
 
+        //initiate the transaction system and greet user
         TransactionSystem transactionSystem = new TransactionSystem(defaultUser);
-
         System.out.println("Welcome to the Budget Tracker Application, "+defaultUser.firstName()+"_"+defaultUser.lastName()+"!");
-        //call on transaction storage
 
+        //variables that are used in more than one switch/case section of the menu
+        long id;
         int month;
+        Date date;
         int userMenuInput;
 
         do {
             System.out.println("\nMAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
-            System.out.println("3. Change existing transaction");
-            System.out.println("4. Change date");
+            System.out.println("3. Change transaction");
+            System.out.println("4. Remove transaction");
             System.out.println("5. Exit program");
             userMenuInput = sc.nextInt();
 
@@ -37,38 +41,68 @@ public class BudgetTracker {
                 case 2:
                     System.out.println("-------------");
                     System.out.println("ADD TRANSACTION");
-                    System.out.print("Choose date\nMonth: ");
-                    month = sc.nextInt();
-                    System.out.print("\nDay: ");
-                    Date date = transactionSystem.createDate(month, sc.nextInt());
-                    if (date == null) {
-                        System.out.println("Returned to main menu due to invalid input.");
-                        break;
-                    } else {
-                        System.out.print("Amount (positive number for income, negative number for expense): ");
-                        double amount = sc.nextDouble();
-                        System.out.println("Choose category: ");
-                        transactionSystem.printTransactionCategories(amount);
-                        int category = sc.nextInt();
-                        transactionSystem.newTransaction(date, amount, category);
+                    while (true) {
+                        System.out.print("Choose date\nMonth: ");
+                        month = sc.nextInt();
+                        System.out.print("Day: ");
+                        date = transactionSystem.createDate(month, sc.nextInt());
+                        if (date == null) {
+                            System.out.println("Returned to main menu due to invalid input.");
+                            break;
+                        } else {
+                            System.out.print("Amount (positive number for income, negative number for expense): ");
+                            double amount = sc.nextDouble();
+                            System.out.println("Choose category: ");
+                            transactionSystem.printTransactionCategories(amount);
+                            transactionSystem.newTransaction(date, amount, sc.nextInt());
+                        }
+                        System.out.println("Add another transaction (any key) or return to main menu (0)");
+                        sc.nextLine();
+                        if (sc.nextLine().equals("0")) {
+                            break;
+                        }
                     }
                     break;
 
                 case 3:
                     System.out.println("-------------");
+                    System.out.println("CHANGE TRANSACTION");
+                    System.out.println("Use print transaction history in main menu to find id");
+                    System.out.print("Specify transaction id (or press 0 to return to main menu): ");
+                    id = sc.nextInt();
+                    if (id == 0) {
+                        break;
+                    }
+                    System.out.println("Set new amount (1) or category (2)");
+                    switch (sc.nextInt()) {
+                        case 1:
+                            System.out.println("Choose amount: ");
+                            transactionSystem.changeTransaction(id, sc.nextDouble());
+                            break;
+
+                        case 2:
+                            System.out.println("Choose category: ");
+                            int input = id % 2 == 0 ? 1 : -1;
+                            transactionSystem.printTransactionCategories(input);
+                            transactionSystem.changeTransaction(id, sc.nextInt());
+                            break;
+
+                        default:
+                            System.out.println("Returned to main menu due to invalid input.");
+                    }
                     break;
 
-                case 4:
-                    /*System.out.println("-------------");
-                    System.out.println("CHANGE DATE");
-                    //2024 is hard coded. Program only handles 1 year.
-                    System.out.println("Current date: "+ transactionSystem.getCurrentDate());
-                    System.out.print("Set new month: ");
-                    int month = sc.nextInt();
-                    System.out.print("Set new day: ");
-                    int day = sc.nextInt();
-                    transactionSystem.changeDate(month, day);*/
 
+                case 4:
+                    System.out.println("-------------");
+                    System.out.println("REMOVE TRANSACTION");
+                    System.out.println("Use print transaction history in main menu to find id");
+                    System.out.print("Specify transaction id (or press 0 to return to main menu): ");
+                    id = sc.nextInt();
+                    if (id == 0) {
+                        break;
+                    }
+                    transactionSystem.deleteTransaction(id);
                     break;
 
                 case 5:

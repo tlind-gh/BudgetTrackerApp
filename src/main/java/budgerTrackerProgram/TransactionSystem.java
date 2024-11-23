@@ -27,48 +27,13 @@ public class TransactionSystem {
                 nextTransactionID = fr.nextLong();
                 fr.close();
             } catch (FileNotFoundException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
+                nextTransactionID = 10;
             }
         }
         incomeStorage = new IncomeStorage(user);
         expenseStorage = new ExpenseStorage(user);
     }
-    /*
-    public void changeTransaction(long id, Date date) {
-        Transaction transaction = searchTransactionByID(id, true);
-        if (transaction == null) {
-            transaction = searchTransactionByID(id, false);
-        }
-        if (transaction != null) {
-            transaction.setDate(date);
-            System.out.println("Date of transaction changed:\n"+transaction);
-        } else {
-            System.out.println("Not a valid id");
-        }
-    }
 
-    public void changeTransaction(long id, double amount) {
-        Transaction transaction = searchTransactionByID(id, true);
-        if (transaction == null) {
-            transaction = searchTransactionByID(id, false);
-        }
-        if (transaction != null) {
-            try {
-                transaction.setAmount(amount);
-                System.out.println("Amount of transaction changed:\n" + transaction);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Not a valid amount for the transaction type");
-            }
-        } else {
-            System.out.println("Not a valid id");
-        }
-    }
-
-    public void deleteTransaction(long id) {
-        if (id )
-    }
-    */
     public Date createDate(int month, int day) {
         Date date = null;
         try {
@@ -96,6 +61,60 @@ public class TransactionSystem {
         }
     }
 
+    public void deleteTransaction(long id) {
+        Transaction transaction;
+        if (id % 2 == 0) {
+            transaction = incomeStorage.findTranscation(id);
+            if (transaction != null) {
+                incomeStorage.removeTransaction(transaction);
+            }
+        } else {
+            transaction = expenseStorage.findTranscation(id);
+            if (transaction != null) {
+                expenseStorage.removeTransaction(transaction);
+            }
+        }
+        if (transaction != null) {
+            System.out.println("The following transaction has been removed: \n"+transaction);
+        } else {
+            System.out.println("No transaction with id "+id+" exists");
+        }
+    }
+
+    public void changeTransaction(long id, double amount) {
+        Transaction transaction;
+        if (id % 2 == 0) {
+            transaction = incomeStorage.findTranscation(id);
+        } else {
+            transaction = expenseStorage.findTranscation(id);
+        }
+        if (transaction != null) {
+            try {
+                transaction.setAmount(amount);
+                System.out.println("Transaction category has been changed: \n" + transaction);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Transaction amount not valid. Must be positive number for income and negative for expense.");
+            }
+        } else {
+            System.out.println("No transaction with id "+id+" exists");
+        }
+    }
+
+    public void changeTransaction(long id, int categoryIndex) {
+        Transaction transaction;
+        if (id % 2 == 0) {
+            transaction = incomeStorage.findTranscation(id);
+        } else {
+            transaction = expenseStorage.findTranscation(id);
+        }
+        if (transaction != null) {
+            transaction.setCategory(categoryIndex);
+            System.out.println("Transaction category has been changed: \n"+transaction);
+        } else {
+            System.out.println("No transaction with id "+id+" exists");
+        }
+    }
+
     public void printTransactionCategories(double transactionAmount) {
         if (transactionAmount > 0) {
             for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
@@ -111,10 +130,13 @@ public class TransactionSystem {
     }
 
     public void printTransactions(int month, int choice) {
-        if (month >= 1 && month <= 12 && choice >= 1 && choice <= 3) {
-            printTransactionsMonth(month, choice);
-        } else if (month == 0 && choice >= 1 && choice <= 3) {
-            printTransactionsYear(choice);
+        if (month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
+            System.out.println("---------------------------");
+            if (month == 0) {
+                printTransactionsYear(choice);
+            } else {
+                printTransactionsMonth(month, choice);
+            }
         } else {
             System.out.println("Input choices not valid");
         }
@@ -126,23 +148,23 @@ public class TransactionSystem {
         if (choice == 1 || choice == 3) {
             incomeSumMonth = incomeStorage.printMonthReturnSum(month);
             if (incomeSumMonth != 0) {
-                System.out.println("Total income "+Date.getMonthAsString(month).toLowerCase()+": " + incomeSumMonth);
+                System.out.println("Total income "+Date.getMonthAsString(month)+": " + incomeSumMonth);
             } else {
-                System.out.println("No income post in "+Date.getMonthAsString(month).toLowerCase());
+                System.out.println("No income posts for" + Date.getMonthAsString(month));
             }
             System.out.println("---------------------------");
         }
         if (choice == 2 || choice == 3) {
+            expenseSumMonth = expenseStorage.printMonthReturnSum(month);
             if (incomeSumMonth != 0) {
-                expenseSumMonth = expenseStorage.printMonthReturnSum(month);
-                System.out.println("Total expenses "+Date.getMonthAsString(month).toLowerCase()+": " + expenseSumMonth);
+                System.out.println("Total expenses "+Date.getMonthAsString(month)+": " + expenseSumMonth);
             } else {
-                System.out.println("No expense posts in "+Date.getMonthAsString(month).toLowerCase());
+                System.out.println("No expense posts for "+Date.getMonthAsString(month));
             }
             System.out.println("---------------------------");
         }
         if (choice == 3) {
-            System.out.println("TOTAL BALANCE" + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth - expenseSumMonth));
+            System.out.println("TOTAL BALANCE " + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth + expenseSumMonth));
             System.out.println("---------------------------");
         }
     }
@@ -165,7 +187,7 @@ public class TransactionSystem {
             System.out.println("---------------------------");
         }
         if (choice == 3) {
-            System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear - expenseSumYear));
+            System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear + expenseSumYear));
             System.out.println("---------------------------");
         }
     }

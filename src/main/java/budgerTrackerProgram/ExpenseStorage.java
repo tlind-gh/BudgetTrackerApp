@@ -73,8 +73,9 @@ public class ExpenseStorage {
         Transaction transaction = null;
         for (int i = 1; i <= 12; i++) {
             for (Transaction t : transactionData.get(i)) {
-                if (transaction.getId() == id) {
+                if (t.getId() == id) {
                     transaction = t;
+                    isFound = true;
                     break;
                 }
             }
