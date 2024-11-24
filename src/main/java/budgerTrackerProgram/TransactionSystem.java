@@ -9,8 +9,8 @@ import java.util.Scanner;
 
 public class TransactionSystem {
     private final String filepath_user;
-    private final IncomeStorage incomeStorage;
-    private final ExpenseStorage expenseStorage;
+    private final TransactionStorage incomeStorage;
+    private final TransactionStorage expenseStorage;
     private long nextTransactionID;
 
     public TransactionSystem(User user) {
@@ -30,8 +30,8 @@ public class TransactionSystem {
                 nextTransactionID = 10;
             }
         }
-        incomeStorage = new IncomeStorage(user);
-        expenseStorage = new ExpenseStorage(user);
+        incomeStorage = new TransactionStorage(filepath_user, true);
+        expenseStorage = new TransactionStorage(filepath_user, false);
     }
 
     public Date createDate(int month, int day) {

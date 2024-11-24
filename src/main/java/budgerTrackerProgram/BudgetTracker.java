@@ -1,10 +1,14 @@
 package budgerTrackerProgram;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class BudgetTracker {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+
+        List<? extends Transaction> x = new ArrayList<Income>();
 
         //hard coded user
         User defaultUser = new User(1, "Test", "User");
