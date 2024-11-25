@@ -25,10 +25,9 @@ public class BudgetTracker {
             System.out.println("\nMAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
-            System.out.println("3. Change transaction");
-            System.out.println("4. Remove transaction");
-            System.out.println("5. Transaction search by date");
-            System.out.println("6. Exit program");
+            System.out.println("3. Change or remove transaction");
+            System.out.println("4. Search transactions by date");
+            System.out.println("5. Exit program");
             userMenuInput = userInputInt();
 
             switch (userMenuInput) {
@@ -38,7 +37,12 @@ public class BudgetTracker {
                     System.out.print("Choose month (1-12) or zero (0) for all: ");
                     month = userInputInt();
                     System.out.print("Income (1), Expense (2) or All (3): ");
-                    transactionSystem.printTransactions(month, userInputInt());
+                    if (month == 0) {
+                        transactionSystem.printTransactionsYear(userInputInt());
+                    } else {
+                        transactionSystem.printTransactionsMonth(month, userInputInt());
+                    }
+
                     break;
 
                 case 2:
@@ -67,14 +71,16 @@ public class BudgetTracker {
 
                 case 3:
                     System.out.println("-------------");
-                    System.out.println("CHANGE TRANSACTION");
+                    System.out.println("CHANGE OR REMOVE TRANSACTION");
                     System.out.println("Use print transaction history or transaction search in main menu to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
                     id = sc.nextLine();
-                    if (id.equals("0")) {
+                    if (id.equals("0") || !transactionSystem.isTransactionIdValid(id)) {
+                        System.out.println("Returned to main menu due to invalid input.");
                         break;
                     }
-                    System.out.println("Set new amount (1) or category (2)");
+
+                    System.out.println("Change amount (1), change category (2) or remove transaction (3)");
                     switch (userInputInt()) {
                         case 1:
                             System.out.println("Choose amount: ");
@@ -82,30 +88,19 @@ public class BudgetTracker {
                             break;
 
                         case 2:
-                            int input = id.startsWith("1") ? 1 : -1;
-                            transactionSystem.printTransactionCategories(input);
+                            transactionSystem.printTransactionCategories(id.startsWith("1") ? 1 : -1);
                             transactionSystem.changeTransaction(id, userInputInt());
                             break;
+
+                        case 3:
+                            transactionSystem.deleteTransaction(id);
 
                         default:
                             System.out.println("Returned to main menu due to invalid input.");
                     }
                     break;
 
-
                 case 4:
-                    System.out.println("-------------");
-                    System.out.println("REMOVE TRANSACTION");
-                    System.out.println("Use print transaction history or transaction search in main menu to find id");
-                    System.out.print("Specify transaction id (or press 0 to return to main menu): ");
-                    id = sc.nextLine();
-                    if (id.equals("1")) {
-                        break;
-                    }
-                    transactionSystem.deleteTransaction(id);
-                    break;
-
-                case 5:
                     System.out.println("-------------");
                     System.out.println("SEARCH TRANSACTION BY DATE");
                     System.out.print("Choose date\nMonth: ");
@@ -119,13 +114,16 @@ public class BudgetTracker {
                     }
                     break;
 
-                case 6:
+                case 5:
                     transactionSystem.closeSystem();
                     System.out.println("Program terminated");
                     break;
+
+                default:
+                    System.out.println("Not a valid menu choice");
             }
 
-        } while (userMenuInput != 6);
+        } while (userMenuInput != 5);
 
 
 

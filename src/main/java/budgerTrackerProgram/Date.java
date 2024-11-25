@@ -7,7 +7,8 @@ public class Date {
     final private int month;
     final private int day;
 
-    //constructor for date, only allowing valid dates (and throws exception for non-valid dates)
+    /*constructor for date, only allowing valid dates (and throws exception for non-valid dates)
+    method called by TransactionSystem class*/
     public Date(int month, int day) {
         if (day > 0 && day < 32 && month > 0 && month < 13) {
             switch (month) {
@@ -42,7 +43,6 @@ public class Date {
     public String toString() {
         return year + "-" + String.format("%02d", month) + "-" + String.format("%02d", day);
     }
-
 
     //Static method to get a month in letters for digits (e.g., "January" from 1)
     public static String getMonthAsString(int month) {

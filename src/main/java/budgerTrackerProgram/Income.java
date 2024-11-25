@@ -26,7 +26,11 @@ public class Income extends Transaction {
 
     }
 
+    /* @Override-methods: NB! example of polymorphism, this method-call on an instance
+    of a child class of Transaction, does different things depending on the child class*/
 
+    /*overrides the setAmount() for Transaction and includes the include specific if-clause
+    not allowing income amount to be zero or negative*/
     @Override
     void setAmount(double amount) {
         if (amount <= 0) {

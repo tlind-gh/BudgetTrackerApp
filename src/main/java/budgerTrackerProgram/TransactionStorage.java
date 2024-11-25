@@ -21,12 +21,14 @@ public class TransactionStorage {
     private final Gson gson;
     private final String filepath;
     private final Map<Integer, List<Transaction>> transactionData;
+    private final String printTransactionHeader;
 
     /*constructor which takes a user specific filepath from the TransactionSystem (this program only has one user
     so this feature is built for a theoretical expansion of the program with more users) and a boolean to
     determine the "role" of the storage (Income or Expense)*/
     public TransactionStorage(String filepath_user, boolean isIncome) {
         this.isIncome = isIncome;
+        printTransactionHeader = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
         gson = new Gson();
         /*income and expense files are stored in different subfolders, filepath is set depending on the "role" set
         by the isIncome boolean*/
@@ -75,10 +77,15 @@ public class TransactionStorage {
 
     void addTransaction(Transaction transaction) {
         transactionData.get(transaction.getDate().getMonth()).add(transaction);
+        System.out.println("Transaction added successfully"+ printTransactionHeader + transaction);
     }
 
-    void removeTransaction(Transaction transaction) {
-        transactionData.get(transaction.getDate().getMonth()).remove(transaction);
+    void removeTransaction(String id) {
+        Transaction transaction = findTransaction(id);
+        if (transaction != null) {
+            transactionData.get(transaction.getDate().getMonth()).remove(transaction);
+            System.out.println("The following transaction has been removed:"+printTransactionHeader+transaction);
+        }
     }
 
     //find and return a transaction based on id by extracting the month from the id (second and third last digit)
@@ -112,19 +119,37 @@ public class TransactionStorage {
         System.out.println("---------------------------");
     }
 
-    //print all transaction for a month and returns the sum
-    double printMonthReturnSum(int month) {
-        double transactionSum = 0;
+    /*print all transaction for a month and returns the sum. Also print sum if boolean input argument is true*/
+    double printMonthReturnSum(int month, boolean printMonthTotal) {
+        double transactionSumMonth = 0;
         String transactionType = isIncome ? "INCOME" : "EXPENSES";
         if (!transactionData.get(month).isEmpty()) {
-            System.out.println(Date.getMonthAsString(month).toUpperCase()+" - "+transactionType);
-            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
+            System.out.println(Date.getMonthAsString(month).toUpperCase() + " - " + transactionType);
+            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date", "Amount", "Category", "Transaction ID");
             for (Transaction transaction : transactionData.get(month)) {
                 System.out.println(transaction);
-                transactionSum += transaction.getAmount();
+                transactionSumMonth += transaction.getAmount();
             }
+        } else if (printMonthTotal) {
+            System.out.println("No "+transactionType+" posts for " + Date.getMonthAsString(month));
+        }
+        System.out.println("---------------------------");
+        if (printMonthTotal) {
+            System.out.println("Total "+transactionType+" for "+ Date.getMonthAsString(month)+": "+transactionSumMonth);
             System.out.println("---------------------------");
         }
-        return transactionSum;
+        return transactionSumMonth;
+    }
+
+    //prints all transactions from the hashmap, calls on the month method w. specification to not print the sum per month
+    double printYearReturnSum() {
+        double transactionSumYear = 0;
+        String transactionType = isIncome ? "INCOME" : "EXPENSES";
+        for (int i = 1; i <= 12; i++) {
+            transactionSumYear += printMonthReturnSum(i, false);
+        }
+        System.out.println("TOTAL "+transactionType+" 2024: " + transactionSumYear);
+        System.out.println("---------------------------");
+        return transactionSumYear;
     }
 }

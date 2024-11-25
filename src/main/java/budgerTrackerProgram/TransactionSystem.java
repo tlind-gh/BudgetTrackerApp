@@ -54,22 +54,19 @@ public class TransactionSystem {
         return date;
     }
 
-    /*creates new transaction (income or expense depending on if amount is positive). Used in conjuction w. createDate
-    and printTransactionCategories. Sets a transactionID and increments the transactionID in the TransactionSystem by 10
-    Id for income is set to the current transactionID of the variable in the TransactionSystem plus the month*10 of the transaction,
-    and expense it set to the transactionID +1 (making IDs for income evenly divided by 2 and expense IDs not - used for determining if
-    a transaction is income or expense based on id)*/
+    /*creates new transaction (income or expense depending on if amount is positive). Called in conjuction w. createDate
+    and printTransactionCategories from the Main class. Sets a unique transaction ID, which holds information of if the
+    transaction is: 1) expense or income (first digit, 1 for income or 2 for expense), 2) transaction month (digit 2 and 3).
+    The nextTransactionID (incremented by 1 after each new transaction) is added to end the id to ensure it is unique.*/
     public void newTransaction(Date date, double amount, int categoryNr) {
         if (amount != 0) {
             String id = amount > 0 ? String.format("1%02d%d",date.getMonth(),nextTransactionID) : String.format("2%02d%d",date.getMonth(),nextTransactionID);
             if (amount > 0) {
                 Income income = new Income(id, date, amount, categoryNr);
                 incomeStorage.addTransaction(income);
-                System.out.println("Transaction added successfully"+ header + income);
             } else {
                 Expense expense = new Expense(id, date, amount, categoryNr);
                 expenseStorage.addTransaction(expense);
-                System.out.println("Transaction added successfully"+header+expense);
             }
             nextTransactionID += 1;
         } else {
@@ -77,34 +74,34 @@ public class TransactionSystem {
         }
     }
 
-    //The following 3 methods uses id % 2 == 0, to determine the child class of the transaction and calls on income or expenseStorage
-    public void deleteTransaction(String id) {
-        Transaction transaction;
+    //The following 4 methods uses id.startsWith to determine the child class of the transaction and calls on income or expenseStorage
+    public boolean isTransactionIdValid(String id) {
+        boolean isTransactionIdValid = false;
         if (id.startsWith("1")) {
-            transaction = incomeStorage.findTransaction(id);
-            if (transaction != null) {
-                incomeStorage.removeTransaction(transaction);
-            }
-        } else {
-            transaction = expenseStorage.findTransaction(id);
-            if (transaction != null) {
-                expenseStorage.removeTransaction(transaction);
-            }
+            isTransactionIdValid = incomeStorage.findTransaction(id) != null;
+        } else if (id.startsWith("2")) {
+            isTransactionIdValid = expenseStorage.findTransaction(id) != null;
         }
-        if (transaction != null) {
-            System.out.println("The following transaction has been removed:"+header+transaction);
+        return isTransactionIdValid;
+    }
+
+    public void deleteTransaction(String id) {
+        if (id.startsWith("1")) {
+            incomeStorage.removeTransaction(id);
+        } else if (id.startsWith("2")) {
+            expenseStorage.removeTransaction(id);
         } else {
-            System.out.println("No transaction with id "+id+" exists");
+            System.out.println("No transaction with id " + id + " exists");
         }
     }
 
     /*Two methods for changing transaction w. the same name. Java calls "correct" methods based on input arguments types
     (i.e., if second argument is double or int)*/
     public void changeTransaction(String id, double amount) {
-        Transaction transaction;
+        Transaction transaction = null;
         if (id.startsWith("1")) {
             transaction = incomeStorage.findTransaction(id);
-        } else {
+        } else if (id.startsWith("2")) {
             transaction = expenseStorage.findTransaction(id);
         }
         if (transaction != null) {
@@ -120,10 +117,10 @@ public class TransactionSystem {
     }
 
     public void changeTransaction(String id, int categoryIndex) {
-        Transaction transaction;
+        Transaction transaction = null;
         if (id.startsWith("1")) {
             transaction = incomeStorage.findTransaction(id);
-        } else {
+        } else if (id.startsWith("2")) {
             transaction = expenseStorage.findTransaction(id);
         }
         if (transaction != null) {
@@ -159,68 +156,44 @@ public class TransactionSystem {
         }
     }
 
-    //prints transactions (income, expense or both) with balance for a spec. month or for the whole year.
-    public void printTransactions(int month, int choice) {
+    //method for printing a month and year, respectively, for the whole year or for a specified month.
+    public void printTransactionsMonth(int month, int choice) {
         if (month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
+            double incomeSumMonth = 0;
+            double expenseSumMonth = 0;
             System.out.println("---------------------------");
-            if (month == 0) {
-                printTransactionsYear(choice);
-            } else {
-                printTransactionsMonth(month, choice);
+            if (choice == 1 || choice == 3) {
+                incomeSumMonth = incomeStorage.printMonthReturnSum(month, true);
+            }
+            if (choice == 2 || choice == 3) {
+                expenseSumMonth = expenseStorage.printMonthReturnSum(month, true);
+            }
+            if (choice == 3) {
+                System.out.println("TOTAL BALANCE " + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth + expenseSumMonth));
+                System.out.println("---------------------------");
             }
         } else {
             System.out.println("Input choices not valid");
         }
     }
 
-    //method for printing a month and year, respectively - called from printTransactions(), separated out for legibility
-    private void printTransactionsMonth(int month, int choice) {
-        double incomeSumMonth = 0;
-        double expenseSumMonth = 0;
-        if (choice == 1 || choice == 3) {
-            incomeSumMonth = incomeStorage.printMonthReturnSum(month);
-            if (incomeSumMonth != 0) {
-                System.out.println("Total income "+Date.getMonthAsString(month)+": " + incomeSumMonth);
-            } else {
-                System.out.println("No income posts for" + Date.getMonthAsString(month));
-            }
-            System.out.println("---------------------------");
-        }
-        if (choice == 2 || choice == 3) {
-            expenseSumMonth = expenseStorage.printMonthReturnSum(month);
-            if (incomeSumMonth != 0) {
-                System.out.println("Total expenses "+Date.getMonthAsString(month)+": " + expenseSumMonth);
-            } else {
-                System.out.println("No expense posts for "+Date.getMonthAsString(month));
-            }
-            System.out.println("---------------------------");
-        }
-        if (choice == 3) {
-            System.out.println("TOTAL BALANCE " + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth + expenseSumMonth));
-            System.out.println("---------------------------");
-        }
-    }
-
-    private void printTransactionsYear(int choice) {
+    public void printTransactionsYear(int choice) {
         double incomeSumYear = 0;
         double expenseSumYear = 0;
-        if (choice == 1 || choice == 3) {
-            for (int i = 1; i <= 12; i++) {
-                incomeSumYear += incomeStorage.printMonthReturnSum(i);
+        if (choice >= 1 && choice <= 3) {
+            System.out.println("---------------------------");
+            if (choice == 1 || choice == 3) {
+                incomeSumYear += incomeStorage.printYearReturnSum();
             }
-            System.out.println("TOTAL INCOME 2024: " + incomeSumYear);
-            System.out.println("---------------------------");
-        }
-        if (choice == 2 || choice == 3) {
-            for (int i = 1; i <= 12; i++) {
-                expenseSumYear += expenseStorage.printMonthReturnSum(i);
+            if (choice == 2 || choice == 3) {
+                expenseSumYear += expenseStorage.printYearReturnSum();
             }
-            System.out.println("TOTAL EXPENSES 2024: " + expenseSumYear);
-            System.out.println("---------------------------");
-        }
-        if (choice == 3) {
-            System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear + expenseSumYear));
-            System.out.println("---------------------------");
+            if (choice == 3) {
+                System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear + expenseSumYear));
+                System.out.println("---------------------------");
+            }
+        } else {
+            System.out.println("Input choice not valid");
         }
     }
 
