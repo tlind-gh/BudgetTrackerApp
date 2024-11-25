@@ -4,7 +4,7 @@ public class Income extends Transaction {
     private EIncomeCategory category;
 
     //constructor called by newTransaction() in the TransactionSystem class
-    Income(long id, Date date, double amount, int categoryIndex) {
+    Income(String id, Date date, double amount, int categoryIndex) {
         super(id, date, amount);
         /*does not allow amount to be 0 or negative for Income objects
         (should not be allowed to occur by the newTransaction() method, but this is an extra safe-guard)*/
@@ -26,9 +26,6 @@ public class Income extends Transaction {
 
     }
 
-    EIncomeCategory getCategory() {
-        return category;
-    }
 
     @Override
     void setAmount(double amount) {
@@ -41,7 +38,7 @@ public class Income extends Transaction {
 
     @Override
     public String toString() {
-        return String.format("%-20s %-20.1f %-20s %-20d", date, amount, category.name(), id);
+        return String.format("%-20s %-20.1f %-20s %-20s", date, amount, category.name(), id);
     }
 }
 

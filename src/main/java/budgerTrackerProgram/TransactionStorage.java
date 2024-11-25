@@ -40,7 +40,7 @@ public class TransactionStorage {
     /*separated from the constructor for legibility, but is only run from the constructor reads from json file storage
     and stores into hashmaps with month (integer) as key and ArrayLists of transactions as values*/
     private void readfromFile() {
-        /*local Type variables (necessary for ArrayLists with gson) for use with the FileReader, is set to ArraList<Income> or
+        /*local Type variables (necessary for ArrayLists with gson) for use with the FileReader, is set to ArrayList<Income> or
         ArrayList<Expense> depending on isIncome boolean*/
         Type listType = isIncome ?
                 new TypeToken<ArrayList<Income>>() {}.getType():
@@ -81,32 +81,44 @@ public class TransactionStorage {
         transactionData.get(transaction.getDate().getMonth()).remove(transaction);
     }
 
-    //find and return a transaction based on id by looping all lists in the hashmap
-    Transaction findTranscation(long id) {
-        boolean isFound = false;
+    //find and return a transaction based on id by extracting the month from the id (second and third last digit)
+    Transaction findTransaction(String id) {
         Transaction transaction = null;
-        for (List<Transaction> transactionArrayList : transactionData.values()) {
-            for (Transaction t : transactionArrayList) {
-                if (t.getId() == id) {
-                    transaction = t;
-                    isFound = true;
-                    break;
-                }
-            }
-            if (isFound) {
+        int month = Integer.parseInt(id.substring(1,3));
+        for (Transaction t : transactionData.get(month)) {
+            if (t.getId().equals(id)) {
+                transaction = t;
                 break;
             }
         }
         return transaction;
     }
 
+    void printByDate(Date date) {
+        ArrayList<Transaction> transactionArrayList = new ArrayList<>();
+        for (Transaction transaction : transactionData.get(date.getMonth())) {
+            if (transaction.getDate().getDay() == date.getDay()) {
+                transactionArrayList.add(transaction);
+            }
+        }
+        if (!transactionArrayList.isEmpty()) {
+            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date", "Amount", "Category", "Transaction ID");
+            for (Transaction transaction : transactionArrayList) {
+                System.out.println(transaction);
+            }
+        } else {
+            System.out.println("No posts for "+date);
+        }
+        System.out.println("---------------------------");
+    }
+
     //print all transaction for a month and returns the sum
     double printMonthReturnSum(int month) {
         double transactionSum = 0;
-        String transactionType = isIncome ? " - INCOME" : " - EXPENSES";
+        String transactionType = isIncome ? "INCOME" : "EXPENSES";
         if (!transactionData.get(month).isEmpty()) {
-            System.out.println(Date.getMonthAsString(month).toUpperCase()+transactionType);
-            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","ID");
+            System.out.println(Date.getMonthAsString(month).toUpperCase()+" - "+transactionType);
+            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
             for (Transaction transaction : transactionData.get(month)) {
                 System.out.println(transaction);
                 transactionSum += transaction.getAmount();

@@ -13,7 +13,7 @@ public class TransactionSystem {
     private final String filepath_user;
     private final TransactionStorage incomeStorage;
     private final TransactionStorage expenseStorage;
-    private long nextTransactionID;
+    private int nextTransactionID;
     private final String header;
 
     /*constructor checks if there is a user folder (which there should be if the user has used that app before),
@@ -21,20 +21,20 @@ public class TransactionSystem {
     Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 10 (starting ID) */
     public TransactionSystem(User user) {
         filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
-        header = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","ID");
+        header = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
         File f1 = new File(filepath_user);
         if (f1.mkdir()) {
             new File(filepath_user + "/Income").mkdir();
             new File(filepath_user + "/Expense").mkdir();
-            nextTransactionID = 10;
+            nextTransactionID = 1;
         } else {
             try {
                 File f2 = new File(filepath_user + "/nextTransactionID.txt");
                 Scanner fr = new Scanner(f2);
-                nextTransactionID = fr.nextLong();
+                nextTransactionID = fr.nextInt();
                 fr.close();
             } catch (FileNotFoundException e) {
-                nextTransactionID = 10;
+                nextTransactionID = 1;
             }
         }
         incomeStorage = new TransactionStorage(filepath_user, true);
@@ -56,36 +56,37 @@ public class TransactionSystem {
 
     /*creates new transaction (income or expense depending on if amount is positive). Used in conjuction w. createDate
     and printTransactionCategories. Sets a transactionID and increments the transactionID in the TransactionSystem by 10
-    Id for income is set to the current transactionID of the variable in the TransactionSystem, and expense it set to
-    the transactionID +1 (making IDs for income evenly divided by 2 and expense IDs not - used for determining if
+    Id for income is set to the current transactionID of the variable in the TransactionSystem plus the month*10 of the transaction,
+    and expense it set to the transactionID +1 (making IDs for income evenly divided by 2 and expense IDs not - used for determining if
     a transaction is income or expense based on id)*/
     public void newTransaction(Date date, double amount, int categoryNr) {
         if (amount != 0) {
+            String id = amount > 0 ? String.format("1%02d%d",date.getMonth(),nextTransactionID) : String.format("2%02d%d",date.getMonth(),nextTransactionID);
             if (amount > 0) {
-                Income income = new Income(nextTransactionID, date, amount, categoryNr);
+                Income income = new Income(id, date, amount, categoryNr);
                 incomeStorage.addTransaction(income);
                 System.out.println("Transaction added successfully"+ header + income);
             } else {
-                Expense expense = new Expense(nextTransactionID+1, date, amount, categoryNr);
+                Expense expense = new Expense(id, date, amount, categoryNr);
                 expenseStorage.addTransaction(expense);
                 System.out.println("Transaction added successfully"+header+expense);
             }
-            nextTransactionID += 10;
+            nextTransactionID += 1;
         } else {
             System.out.println("Transaction amount cannot be zero.");
         }
     }
 
     //The following 3 methods uses id % 2 == 0, to determine the child class of the transaction and calls on income or expenseStorage
-    public void deleteTransaction(long id) {
+    public void deleteTransaction(String id) {
         Transaction transaction;
-        if (id % 2 == 0) {
-            transaction = incomeStorage.findTranscation(id);
+        if (id.startsWith("1")) {
+            transaction = incomeStorage.findTransaction(id);
             if (transaction != null) {
                 incomeStorage.removeTransaction(transaction);
             }
         } else {
-            transaction = expenseStorage.findTranscation(id);
+            transaction = expenseStorage.findTransaction(id);
             if (transaction != null) {
                 expenseStorage.removeTransaction(transaction);
             }
@@ -99,12 +100,12 @@ public class TransactionSystem {
 
     /*Two methods for changing transaction w. the same name. Java calls "correct" methods based on input arguments types
     (i.e., if second argument is double or int)*/
-    public void changeTransaction(long id, double amount) {
+    public void changeTransaction(String id, double amount) {
         Transaction transaction;
-        if (id % 2 == 0) {
-            transaction = incomeStorage.findTranscation(id);
+        if (id.startsWith("1")) {
+            transaction = incomeStorage.findTransaction(id);
         } else {
-            transaction = expenseStorage.findTranscation(id);
+            transaction = expenseStorage.findTransaction(id);
         }
         if (transaction != null) {
             try {
@@ -118,12 +119,12 @@ public class TransactionSystem {
         }
     }
 
-    public void changeTransaction(long id, int categoryIndex) {
+    public void changeTransaction(String id, int categoryIndex) {
         Transaction transaction;
-        if (id % 2 == 0) {
-            transaction = incomeStorage.findTranscation(id);
+        if (id.startsWith("1")) {
+            transaction = incomeStorage.findTransaction(id);
         } else {
-            transaction = expenseStorage.findTranscation(id);
+            transaction = expenseStorage.findTransaction(id);
         }
         if (transaction != null) {
             transaction.setCategory(categoryIndex);
@@ -133,15 +134,25 @@ public class TransactionSystem {
         }
     }
 
+    public void printTransactionsByDate(Date date) {
+        System.out.println("\nIncome");
+        incomeStorage.printByDate(date);
+        System.out.println("Expenses");
+        expenseStorage.printByDate(date);
+    }
+
     //prints a list of either EIncomeCategories or EExpenseCategories enums depending on if transaction amount is neg. or pos.)
     public void printTransactionCategories(double transactionAmount) {
-        if (transactionAmount > 0) {
-            for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
-                System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
-            }
-        } else if (transactionAmount < 0) {
-            for (EExpenseCategory enumCategory : EExpenseCategory.values()) {
-                System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
+        if (transactionAmount != 0) {
+            System.out.println("Choose category: ");
+            if (transactionAmount > 0) {
+                for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
+                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
+                }
+            } else {
+                for (EExpenseCategory enumCategory : EExpenseCategory.values()) {
+                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
+                }
             }
         } else {
             System.out.println("Transaction amount cannot be zero.");

@@ -5,7 +5,7 @@ public class Expense extends Transaction{
     private EExpenseCategory category;
 
     //constructor called by newTransaction() in the TransactionSystem class
-    Expense(long id, Date date, double amount, int categoryIndex) {
+    Expense(String id, Date date, double amount, int categoryIndex) {
         super(id, date, amount);
         /*does not allow amount to be 0 or positive for Expense objects
         (should not be allowed to occur by the newTransaction() method, but this is an extra safe-guard)*/
@@ -26,10 +26,6 @@ public class Expense extends Transaction{
         }
     }
 
-    EExpenseCategory getCategory() {
-        return category;
-    }
-
     @Override
     void setAmount(double amount) {
         if (amount >= 0) {
@@ -41,6 +37,6 @@ public class Expense extends Transaction{
 
     @Override
     public String toString() {
-        return String.format("%-20s %-20.1f %-20s %-20d", date, amount, category.name(), id);
+        return String.format("%-20s %-20.1f %-20s %-20s", date, amount, category.name(), id);
     }
 }
