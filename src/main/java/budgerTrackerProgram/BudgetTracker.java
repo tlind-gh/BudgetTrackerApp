@@ -1,14 +1,11 @@
 package budgerTrackerProgram;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class BudgetTracker {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-
-        List<? extends Transaction> x = new ArrayList<Income>();
 
         //hard coded user
         User defaultUser = new User(1, "Test", "User");
@@ -23,6 +20,7 @@ public class BudgetTracker {
         Date date;
         int userMenuInput;
 
+        //menu, loops while user has not chosen to exit the application;
         do {
             System.out.println("\nMAIN MENU");
             System.out.println("1. Show transaction history");
@@ -30,16 +28,16 @@ public class BudgetTracker {
             System.out.println("3. Change transaction");
             System.out.println("4. Remove transaction");
             System.out.println("5. Exit program");
-            userMenuInput = sc.nextInt();
+            userMenuInput = userInputInt();
 
             switch (userMenuInput) {
                 case 1:
                     System.out.println("-------------");
                     System.out.println("TRANSACTION HISTORY");
                     System.out.print("Choose month (1-12) or zero (0) for all: ");
-                    month = sc.nextInt();
-                    System.out.println("Income (1), Expense (2) or All (3)");
-                    transactionSystem.printTransactions(month, sc.nextInt());
+                    month = userInputInt();
+                    System.out.print("Income (1), Expense (2) or All (3): ");
+                    transactionSystem.printTransactions(month, userInputInt());
                     break;
 
                 case 2:
@@ -47,21 +45,20 @@ public class BudgetTracker {
                     System.out.println("ADD TRANSACTION");
                     while (true) {
                         System.out.print("Choose date\nMonth: ");
-                        month = sc.nextInt();
+                        month = userInputInt();
                         System.out.print("Day: ");
-                        date = transactionSystem.createDate(month, sc.nextInt());
+                        date = transactionSystem.createDate(month, userInputInt());
                         if (date == null) {
                             System.out.println("Returned to main menu due to invalid input.");
                             break;
                         } else {
                             System.out.print("Amount (positive number for income, negative number for expense): ");
-                            double amount = sc.nextDouble();
+                            double amount = userInputDouble();
                             System.out.println("Choose category: ");
                             transactionSystem.printTransactionCategories(amount);
-                            transactionSystem.newTransaction(date, amount, sc.nextInt());
+                            transactionSystem.newTransaction(date, amount, userInputInt());
                         }
                         System.out.println("Add another transaction (any key) or return to main menu (0)");
-                        sc.nextLine();
                         if (sc.nextLine().equals("0")) {
                             break;
                         }
@@ -73,22 +70,22 @@ public class BudgetTracker {
                     System.out.println("CHANGE TRANSACTION");
                     System.out.println("Use print transaction history in main menu to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
-                    id = sc.nextInt();
+                    id = userInputInt();
                     if (id == 0) {
                         break;
                     }
                     System.out.println("Set new amount (1) or category (2)");
-                    switch (sc.nextInt()) {
+                    switch (userInputInt()) {
                         case 1:
                             System.out.println("Choose amount: ");
-                            transactionSystem.changeTransaction(id, sc.nextDouble());
+                            transactionSystem.changeTransaction(id, userInputDouble());
                             break;
 
                         case 2:
                             System.out.println("Choose category: ");
                             int input = id % 2 == 0 ? 1 : -1;
                             transactionSystem.printTransactionCategories(input);
-                            transactionSystem.changeTransaction(id, sc.nextInt());
+                            transactionSystem.changeTransaction(id, userInputInt());
                             break;
 
                         default:
@@ -102,7 +99,7 @@ public class BudgetTracker {
                     System.out.println("REMOVE TRANSACTION");
                     System.out.println("Use print transaction history in main menu to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
-                    id = sc.nextInt();
+                    id = userInputInt();
                     if (id == 0) {
                         break;
                     }
@@ -120,6 +117,39 @@ public class BudgetTracker {
 
 
 
+    }
+
+    //Just some input methods to avoid in case of InputMismatchException from user input
+    public static int userInputInt() {
+        Scanner sc = new Scanner(System.in);
+        int input;
+        while(true) {
+            try {
+                input = sc.nextInt();
+                sc.nextLine();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.print("Input must be a number. Try again: ");
+                sc.nextLine();
+            }
+        }
+        return input;
+    }
+
+    public static double userInputDouble() {
+        Scanner sc = new Scanner(System.in);
+        double input;
+        while(true) {
+            try {
+                input = sc.nextInt();
+                sc.nextLine();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.print("Input must be a number. Try again: ");
+                sc.nextLine();
+            }
+        }
+        return input;
     }
 }
 

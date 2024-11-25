@@ -106,7 +106,7 @@ public class TransactionStorage {
         String transactionType = isIncome ? " - INCOME" : " - EXPENSES";
         if (!transactionData.get(month).isEmpty()) {
             System.out.println(Date.getMonthAsString(month).toUpperCase()+transactionType);
-            System.out.println("Date\t\t\tAmount\t\tCategory\t\tTransaction id");
+            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","ID");
             for (Transaction transaction : transactionData.get(month)) {
                 System.out.println(transaction);
                 transactionSum += transaction.getAmount();

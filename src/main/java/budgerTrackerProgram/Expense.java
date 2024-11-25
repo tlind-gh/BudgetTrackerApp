@@ -41,6 +41,6 @@ public class Expense extends Transaction{
 
     @Override
     public String toString() {
-        return date +"\t\t"+amount+"\t\t"+category.name()+"\t\t\t"+id;
+        return String.format("%-20s %-20.1f %-20s %-20d", date, amount, category.name(), id);
     }
 }

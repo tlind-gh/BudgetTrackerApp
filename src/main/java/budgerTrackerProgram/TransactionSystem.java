@@ -7,14 +7,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+/*The only class that is called from the main class (BudgetTracker), and which has methods that calls upon other classes.
+Class holds income and expense storage (instances of TransactionStorage) which hold the transaction data*/
 public class TransactionSystem {
     private final String filepath_user;
     private final TransactionStorage incomeStorage;
     private final TransactionStorage expenseStorage;
     private long nextTransactionID;
+    private final String header;
 
+    /*constructor checks if there is a user folder (which there should be if the user has used that app before),
+    If there is a folder, it loads the last transactionID from a txt file in this folder.
+    Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 10 (starting ID) */
     public TransactionSystem(User user) {
         filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
+        header = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","ID");
         File f1 = new File(filepath_user);
         if (f1.mkdir()) {
             new File(filepath_user + "/Income").mkdir();
@@ -33,7 +40,10 @@ public class TransactionSystem {
         incomeStorage = new TransactionStorage(filepath_user, true);
         expenseStorage = new TransactionStorage(filepath_user, false);
     }
+    /*METHODS: all public methods are called from main class and also checks that arguments are valid for the method.
+    If arguments are not valid it prints a statement to the user informing that arguments are not valid*/
 
+    //create an instance of the Date class and if arguments are not a valid date.
     public Date createDate(int month, int day) {
         Date date = null;
         try {
@@ -44,16 +54,21 @@ public class TransactionSystem {
         return date;
     }
 
+    /*creates new transaction (income or expense depending on if amount is positive). Used in conjuction w. createDate
+    and printTransactionCategories. Sets a transactionID and increments the transactionID in the TransactionSystem by 10
+    Id for income is set to the current transactionID of the variable in the TransactionSystem, and expense it set to
+    the transactionID +1 (making IDs for income evenly divided by 2 and expense IDs not - used for determining if
+    a transaction is income or expense based on id)*/
     public void newTransaction(Date date, double amount, int categoryNr) {
         if (amount != 0) {
             if (amount > 0) {
                 Income income = new Income(nextTransactionID, date, amount, categoryNr);
                 incomeStorage.addTransaction(income);
-                System.out.println("Transaction added successfully\n"+ income);
+                System.out.println("Transaction added successfully"+ header + income);
             } else {
                 Expense expense = new Expense(nextTransactionID+1, date, amount, categoryNr);
                 expenseStorage.addTransaction(expense);
-                System.out.println("Transaction added successfully\n"+ expense);
+                System.out.println("Transaction added successfully"+header+expense);
             }
             nextTransactionID += 10;
         } else {
@@ -61,6 +76,7 @@ public class TransactionSystem {
         }
     }
 
+    //The following 3 methods uses id % 2 == 0, to determine the child class of the transaction and calls on income or expenseStorage
     public void deleteTransaction(long id) {
         Transaction transaction;
         if (id % 2 == 0) {
@@ -75,12 +91,14 @@ public class TransactionSystem {
             }
         }
         if (transaction != null) {
-            System.out.println("The following transaction has been removed: \n"+transaction);
+            System.out.println("The following transaction has been removed:"+header+transaction);
         } else {
             System.out.println("No transaction with id "+id+" exists");
         }
     }
 
+    /*Two methods for changing transaction w. the same name. Java calls "correct" methods based on input arguments types
+    (i.e., if second argument is double or int)*/
     public void changeTransaction(long id, double amount) {
         Transaction transaction;
         if (id % 2 == 0) {
@@ -91,7 +109,7 @@ public class TransactionSystem {
         if (transaction != null) {
             try {
                 transaction.setAmount(amount);
-                System.out.println("Transaction category has been changed: \n" + transaction);
+                System.out.println("Transaction amount has been changed"+header+transaction);
             } catch (IllegalArgumentException e) {
                 System.out.println("Transaction amount not valid. Must be positive number for income and negative for expense.");
             }
@@ -109,12 +127,13 @@ public class TransactionSystem {
         }
         if (transaction != null) {
             transaction.setCategory(categoryIndex);
-            System.out.println("Transaction category has been changed: \n"+transaction);
+            System.out.println("Transaction category has been changed"+header+transaction);
         } else {
             System.out.println("No transaction with id "+id+" exists");
         }
     }
 
+    //prints a list of either EIncomeCategories or EExpenseCategories enums depending on if transaction amount is neg. or pos.)
     public void printTransactionCategories(double transactionAmount) {
         if (transactionAmount > 0) {
             for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
@@ -129,6 +148,7 @@ public class TransactionSystem {
         }
     }
 
+    //prints transactions (income, expense or both) with balance for a spec. month or for the whole year.
     public void printTransactions(int month, int choice) {
         if (month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
             System.out.println("---------------------------");
@@ -142,6 +162,7 @@ public class TransactionSystem {
         }
     }
 
+    //method for printing a month and year, respectively - called from printTransactions(), separated out for legibility
     private void printTransactionsMonth(int month, int choice) {
         double incomeSumMonth = 0;
         double expenseSumMonth = 0;
@@ -192,6 +213,7 @@ public class TransactionSystem {
         }
     }
 
+    //writes the current transactionID to file and also calls on the write to file method for the respective transaction systems
     public void closeSystem() {
         incomeStorage.writeToFile();
         expenseStorage.writeToFile();
