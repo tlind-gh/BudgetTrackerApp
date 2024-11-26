@@ -20,13 +20,11 @@ public class TransactionStorage {
     private final Gson gson;
     private final String filepath;
     private final Map<Integer, List<Transaction>> transactionData;
-    private final String transactionHeader;
 
     /*constructor which takes a user specific filepath from the TransactionSystem (this program only has one user
     so this feature is built for a theoretical expansion of the program with more users) and a boolean to
     determine the "role" of the storage (Income or Expense)*/
     public TransactionStorage(String filepath_user, boolean isIncome) {
-        transactionHeader = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
         gson = new Gson();
         /*income and expense files are stored in different subfolders, filepath is set depending on the "role" set
         by the isIncome boolean*/
@@ -73,11 +71,6 @@ public class TransactionStorage {
         }
     }
 
-    void addTransaction(Transaction transaction) {
-        transactionData.get(transaction.getDate().getMonth()).add(transaction);
-        System.out.println("Transaction added successfully"+ transactionHeader + transaction);
-    }
-
     //find and return a transaction based on id by extracting the month from the id (second and third last digit)
     Transaction findTransaction(String id) {
         Transaction transaction = null;
@@ -91,11 +84,16 @@ public class TransactionStorage {
         return transaction;
     }
 
+    void addTransaction(Transaction transaction) {
+        transactionData.get(transaction.getDate().getMonth()).add(transaction);
+        System.out.println("\nTransaction added successfully\n"+ Transaction.getTransactionHeader() +"\n" + transaction);
+    }
+
     void removeTransaction(String id) {
         Transaction transaction = findTransaction(id);
         if (transaction != null) {
             transactionData.get(transaction.getDate().getMonth()).remove(transaction);
-            System.out.println("The following transaction has been removed:"+transactionHeader+transaction);
+            System.out.println("\nThe following transaction has been removed:\n"+ Transaction.getTransactionHeader() +"\n" + transaction);
         }
     }
 
@@ -103,9 +101,9 @@ public class TransactionStorage {
         double transactionSum = 0;
         boolean printTransactionHeader = true;
         for (int month : months) {
-            String header = printTransactionHeader ? transactionHeader : "";
+            String header = printTransactionHeader ? Transaction.getTransactionHeader()+"\n" : "";
             if (!transactionData.get(month).isEmpty()) {
-                System.out.println(header);
+                System.out.print(header);
                 printTransactionHeader = false;
                 for (Transaction transaction : transactionData.get(month)) {
                     System.out.println(transaction);
@@ -116,22 +114,14 @@ public class TransactionStorage {
         return transactionSum;
     }
 
-    void printByDate(Date date) {
-        ArrayList<Transaction> transactionArrayList = new ArrayList<>();
+    List<Transaction> getTransactionsByDate(Date date) {
+        List<Transaction> transactionArrayList = new ArrayList<>();
         for (Transaction transaction : transactionData.get(date.getMonth())) {
             if (transaction.getDate().getDay() == date.getDay()) {
                 transactionArrayList.add(transaction);
             }
         }
-        if (!transactionArrayList.isEmpty()) {
-            System.out.printf("%-20s %-20s %-20s %-20s\n", "Date", "Amount", "Category", "Transaction ID");
-            for (Transaction transaction : transactionArrayList) {
-                System.out.println(transaction);
-            }
-        } else {
-            System.out.println("No posts for "+date);
-        }
-        System.out.println("---------------------------");
+        return transactionArrayList;
     }
 
 

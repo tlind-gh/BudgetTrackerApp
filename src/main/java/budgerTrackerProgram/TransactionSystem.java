@@ -1,12 +1,11 @@
 package budgerTrackerProgram;
 
-import com.sun.tools.javac.Main;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 /*The only class that is called from the main class (BudgetTracker), and which has methods that calls upon other classes.
@@ -16,14 +15,12 @@ public class TransactionSystem {
     private final TransactionStorage incomeStorage;
     private final TransactionStorage expenseStorage;
     private int nextTransactionID;
-    private final String header;
 
     /*constructor checks if there is a user folder (which there should be if the user has used that app before),
     If there is a folder, it loads the last transactionID from a txt file in this folder.
     Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 10 (starting ID) */
     public TransactionSystem(User user) {
         filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
-        header = String.format("\n%-20s %-20s %-20s %-20s\n", "Date","Amount","Category","Transaction ID");
         File f1 = new File(filepath_user);
         if (f1.mkdir()) {
             new File(filepath_user + "/Income").mkdir();
@@ -109,12 +106,12 @@ public class TransactionSystem {
         if (transaction != null) {
             try {
                 transaction.setAmount(amount);
-                System.out.println("Transaction amount has been changed"+header+transaction);
+                System.out.println("\nTransaction amount has been changed\n"+Transaction.getTransactionHeader()+"\n"+transaction);
             } catch (IllegalArgumentException e) {
-                System.out.println("Transaction amount not valid. Must be positive number for income and negative for expense.");
+                System.out.println("\nTransaction amount not valid. Must be positive number for income and negative for expense.");
             }
         } else {
-            System.out.println("No transaction with id "+id+" exists");
+            System.out.println("\nNo transaction with id "+id+" exists");
         }
     }
 
@@ -127,9 +124,9 @@ public class TransactionSystem {
         }
         if (transaction != null) {
             transaction.setCategory(categoryIndex);
-            System.out.println("Transaction category has been changed"+header+transaction);
+            System.out.println("\nTransaction category has been changed\n"+Transaction.getTransactionHeader()+"\n"+transaction);
         } else {
-            System.out.println("No transaction with id "+id+" exists");
+            System.out.println("\nNo transaction with id "+id+" exists");
         }
     }
 
@@ -139,7 +136,7 @@ public class TransactionSystem {
         } else if (id.startsWith("2")) {
             expenseStorage.removeTransaction(id);
         } else {
-            System.out.println("No transaction with id " + id + " exists");
+            System.out.println("\nNo transaction with id " + id + " exists");
         }
     }
 
@@ -151,22 +148,29 @@ public class TransactionSystem {
             String timePeriod = (month == 0) ? "2024" : Date.getMonthAsString(month);
             double incomeSum = 0;
             double expenseSum = 0;
-            System.out.println("---------------------------");
             if (choice == 1 || choice == 3) {
+                System.out.println("-------------");
                 System.out.println("INCOME - "+timePeriod.toUpperCase());
                 incomeSum = incomeStorage.printTransactionsReturnSum(listOfMonths);
-                System.out.println("Total income "+timePeriod+": "+ incomeSum);
-                System.out.println("---------------------------");
+                if (incomeSum != 0) {
+                    System.out.println("Total income "+timePeriod+": "+ incomeSum);
+                } else {
+                    System.out.println("No income posts for "+ timePeriod);
+                }
             }
             if (choice == 2 || choice == 3) {
+                System.out.println("-------------");
                 System.out.println("EXPENSE - "+timePeriod.toUpperCase());
                 expenseSum = expenseStorage.printTransactionsReturnSum(listOfMonths);
-                System.out.println("Total expense "+timePeriod+": "+ expenseSum);
-                System.out.println("---------------------------");
+                if (expenseSum != 0) {
+                    System.out.println("Total expense "+timePeriod+": "+ expenseSum);
+                } else {
+                    System.out.println("No expense posts for "+ timePeriod);
+                }
             }
             if (choice == 3) {
+                System.out.println("-------------");
                 System.out.println("TOTAL BALANCE " + timePeriod.toUpperCase() + ": " + (incomeSum + expenseSum));
-                System.out.println("---------------------------");
             }
         } else {
             System.out.println("Input choices not valid");
@@ -174,10 +178,17 @@ public class TransactionSystem {
     }
 
     public void printTransactionsByDate(Date date) {
-        System.out.println("\nIncome");
-        incomeStorage.printByDate(date);
-        System.out.println("Expenses");
-        expenseStorage.printByDate(date);
+        System.out.println("-------------");
+        List<Transaction> transactionList = incomeStorage.getTransactionsByDate(date);
+        transactionList.addAll(expenseStorage.getTransactionsByDate(date));
+        if (!transactionList.isEmpty()) {
+            System.out.println("TRANSACTIONS MADE "+date+"\n"+Transaction.getTransactionHeader());
+            for (Transaction transaction : transactionList) {
+                System.out.println(transaction);
+            }
+        } else {
+            System.out.println("No transactions made "+date);
+        }
     }
 
     //writes the current transactionID to file and calls on the write to file method for the respective transaction systems

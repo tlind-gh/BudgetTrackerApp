@@ -22,7 +22,8 @@ public class BudgetTracker {
 
         //menu, loops while user has not chosen to exit the application;
         do {
-            System.out.println("\nMAIN MENU");
+            System.out.println("-------------");
+            System.out.println("MAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
             System.out.println("3. Change or remove transaction");
@@ -88,6 +89,7 @@ public class BudgetTracker {
 
                         case 3:
                             transactionSystem.deleteTransaction(id);
+                            break;
 
                         default:
                             System.out.println("Returned to main menu due to invalid input.");

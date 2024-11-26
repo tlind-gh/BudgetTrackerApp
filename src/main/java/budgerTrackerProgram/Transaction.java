@@ -13,7 +13,12 @@ public abstract class Transaction {
         this.amount = amount;
     }
 
-    //abstract method, i.e., no method body, only present to be able to call the "same" method in the child classes
+    void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    /*abstract method, i.e., no method body (because Transaction class does not have a variable for category) '
+    only present to be able to call the "same" method in the child classes*/
     abstract void setCategory(int categoryIndex);
 
     String getId() {
@@ -28,7 +33,9 @@ public abstract class Transaction {
         return amount;
     }
 
-    void setAmount(double amount) {
-        this.amount = amount;
+    /*Static method for getting a String with column headers corresponding to the information in the string
+    returned with the toString() method in the child classes*/
+    static String getTransactionHeader() {
+        return String.format("%-20s %-20s %-20s %-20s", "Date","Amount","Category","Transaction ID");
     }
 }
