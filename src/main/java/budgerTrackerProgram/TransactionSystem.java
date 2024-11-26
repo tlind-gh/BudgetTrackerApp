@@ -1,5 +1,7 @@
 package budgerTrackerProgram;
 
+import com.sun.tools.javac.Main;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -74,29 +76,29 @@ public class TransactionSystem {
         }
     }
 
-    //The following 4 methods uses id.startsWith to determine the child class of the transaction and calls on income or expenseStorage
-    public boolean isTransactionIdValid(String id) {
-        boolean isTransactionIdValid = false;
-        if (id.startsWith("1")) {
-            isTransactionIdValid = incomeStorage.findTransaction(id) != null;
-        } else if (id.startsWith("2")) {
-            isTransactionIdValid = expenseStorage.findTransaction(id) != null;
-        }
-        return isTransactionIdValid;
-    }
-
-    public void deleteTransaction(String id) {
-        if (id.startsWith("1")) {
-            incomeStorage.removeTransaction(id);
-        } else if (id.startsWith("2")) {
-            expenseStorage.removeTransaction(id);
+    //prints a list of either EIncomeCategories or EExpenseCategories enums depending on if transaction amount is neg. or pos.)
+    public void printTransactionCategories(double transactionAmount) {
+        if (transactionAmount != 0) {
+            System.out.println("Choose category: ");
+            if (transactionAmount > 0) {
+                for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
+                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
+                }
+            } else {
+                for (EExpenseCategory enumCategory : EExpenseCategory.values()) {
+                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
+                }
+            }
         } else {
-            System.out.println("No transaction with id " + id + " exists");
+            System.out.println("Transaction amount cannot be zero.");
         }
     }
 
-    /*Two methods for changing transaction w. the same name. Java calls "correct" methods based on input arguments types
-    (i.e., if second argument is double or int)*/
+    /*GENERAL METHOD INFO changeTransaction AND deleteTransaction():
+    uses id.startsWith to determine the child class of the transaction and calls on income or expenseStorage*/
+
+    /*changeTransaction method has two variants (method overloading). If the 2nd input argument for changeTransaction is
+    a double -> change amount, and if it is an int -> change category*/
     public void changeTransaction(String id, double amount) {
         Transaction transaction = null;
         if (id.startsWith("1")) {
@@ -131,45 +133,39 @@ public class TransactionSystem {
         }
     }
 
-    public void printTransactionsByDate(Date date) {
-        System.out.println("\nIncome");
-        incomeStorage.printByDate(date);
-        System.out.println("Expenses");
-        expenseStorage.printByDate(date);
-    }
-
-    //prints a list of either EIncomeCategories or EExpenseCategories enums depending on if transaction amount is neg. or pos.)
-    public void printTransactionCategories(double transactionAmount) {
-        if (transactionAmount != 0) {
-            System.out.println("Choose category: ");
-            if (transactionAmount > 0) {
-                for (EIncomeCategory enumCategory : EIncomeCategory.values()) {
-                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
-                }
-            } else {
-                for (EExpenseCategory enumCategory : EExpenseCategory.values()) {
-                    System.out.println((enumCategory.ordinal() + 1) + ". " + enumCategory.name());
-                }
-            }
+    public void deleteTransaction(String id) {
+        if (id.startsWith("1")) {
+            incomeStorage.removeTransaction(id);
+        } else if (id.startsWith("2")) {
+            expenseStorage.removeTransaction(id);
         } else {
-            System.out.println("Transaction amount cannot be zero.");
+            System.out.println("No transaction with id " + id + " exists");
         }
     }
 
-    //method for printing a month and year, respectively, for the whole year or for a specified month.
-    public void printTransactionsMonth(int month, int choice) {
+    /*method for printing a month (1st argument is 1-12) or year (1st argument is 0) depending on input.
+    Can print income, expense or all depending on second input argument*/
+    public void printTransactions(int month, int choice) {
         if (month >= 0 && month <= 12 && choice >= 1 && choice <= 3) {
-            double incomeSumMonth = 0;
-            double expenseSumMonth = 0;
+            int[] listOfMonths = (month == 0) ? new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} : new int[]{month};
+            String timePeriod = (month == 0) ? "2024" : Date.getMonthAsString(month);
+            double incomeSum = 0;
+            double expenseSum = 0;
             System.out.println("---------------------------");
             if (choice == 1 || choice == 3) {
-                incomeSumMonth = incomeStorage.printMonthReturnSum(month, true);
+                System.out.println("INCOME - "+timePeriod.toUpperCase());
+                incomeSum = incomeStorage.printTransactionsReturnSum(listOfMonths);
+                System.out.println("Total income "+timePeriod+": "+ incomeSum);
+                System.out.println("---------------------------");
             }
             if (choice == 2 || choice == 3) {
-                expenseSumMonth = expenseStorage.printMonthReturnSum(month, true);
+                System.out.println("EXPENSE - "+timePeriod.toUpperCase());
+                expenseSum = expenseStorage.printTransactionsReturnSum(listOfMonths);
+                System.out.println("Total expense "+timePeriod+": "+ expenseSum);
+                System.out.println("---------------------------");
             }
             if (choice == 3) {
-                System.out.println("TOTAL BALANCE " + Date.getMonthAsString(month).toUpperCase() + ": " + (incomeSumMonth + expenseSumMonth));
+                System.out.println("TOTAL BALANCE " + timePeriod.toUpperCase() + ": " + (incomeSum + expenseSum));
                 System.out.println("---------------------------");
             }
         } else {
@@ -177,27 +173,14 @@ public class TransactionSystem {
         }
     }
 
-    public void printTransactionsYear(int choice) {
-        double incomeSumYear = 0;
-        double expenseSumYear = 0;
-        if (choice >= 1 && choice <= 3) {
-            System.out.println("---------------------------");
-            if (choice == 1 || choice == 3) {
-                incomeSumYear += incomeStorage.printYearReturnSum();
-            }
-            if (choice == 2 || choice == 3) {
-                expenseSumYear += expenseStorage.printYearReturnSum();
-            }
-            if (choice == 3) {
-                System.out.println("TOTAL BALANCE 2024: " + (incomeSumYear + expenseSumYear));
-                System.out.println("---------------------------");
-            }
-        } else {
-            System.out.println("Input choice not valid");
-        }
+    public void printTransactionsByDate(Date date) {
+        System.out.println("\nIncome");
+        incomeStorage.printByDate(date);
+        System.out.println("Expenses");
+        expenseStorage.printByDate(date);
     }
 
-    //writes the current transactionID to file and also calls on the write to file method for the respective transaction systems
+    //writes the current transactionID to file and calls on the write to file method for the respective transaction systems
     public void closeSystem() {
         incomeStorage.writeToFile();
         expenseStorage.writeToFile();

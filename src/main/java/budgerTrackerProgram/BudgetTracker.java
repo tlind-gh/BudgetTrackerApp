@@ -37,12 +37,7 @@ public class BudgetTracker {
                     System.out.print("Choose month (1-12) or zero (0) for all: ");
                     month = userInputInt();
                     System.out.print("Income (1), Expense (2) or All (3): ");
-                    if (month == 0) {
-                        transactionSystem.printTransactionsYear(userInputInt());
-                    } else {
-                        transactionSystem.printTransactionsMonth(month, userInputInt());
-                    }
-
+                    transactionSystem.printTransactions(month, userInputInt());
                     break;
 
                 case 2:
@@ -75,8 +70,7 @@ public class BudgetTracker {
                     System.out.println("Use print transaction history or transaction search in main menu to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
                     id = sc.nextLine();
-                    if (id.equals("0") || !transactionSystem.isTransactionIdValid(id)) {
-                        System.out.println("Returned to main menu due to invalid input.");
+                    if (id.equals("0")) {
                         break;
                     }
 
