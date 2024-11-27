@@ -26,8 +26,8 @@ public class BudgetTracker {
             System.out.println("MAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
-            System.out.println("3. Change or remove transaction");
-            System.out.println("4. Search transactions by date");
+            System.out.println("3. Find transaction by id");
+            System.out.println("4. Change or remove transaction");
             System.out.println("5. Exit program");
             userMenuInput = userInputInt();
 
@@ -67,8 +67,15 @@ public class BudgetTracker {
 
                 case 3:
                     System.out.println("-------------");
+                    System.out.println("FIND TRANSACTION BY ID");
+                    System.out.print("Specify transaction id: ");
+                    transactionSystem.findTransaction(sc.nextLine());
+                    break;
+
+                case 4:
+                    System.out.println("-------------");
                     System.out.println("CHANGE OR REMOVE TRANSACTION");
-                    System.out.println("Use print transaction history or transaction search in main menu to find id");
+                    System.out.println("Note: use print transaction history to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
                     id = sc.nextLine();
                     if (id.equals("0")) {
@@ -93,20 +100,6 @@ public class BudgetTracker {
 
                         default:
                             System.out.println("Returned to main menu due to invalid input.");
-                    }
-                    break;
-
-                case 4:
-                    System.out.println("-------------");
-                    System.out.println("SEARCH TRANSACTION BY DATE");
-                    System.out.print("Choose date\nMonth: ");
-                    month = userInputInt();
-                    System.out.print("Day: ");
-                    date = transactionSystem.createDate(month, userInputInt());
-                    if (date != null) {
-                        transactionSystem.printTransactionsByDate(date);
-                    } else {
-                        System.out.println("Returned to main menu due to invalid input.");
                     }
                     break;
 

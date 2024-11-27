@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Scanner;
 
 /*The only class that is called from the main class (BudgetTracker), and which has methods that calls upon other classes.
@@ -96,6 +95,21 @@ public class TransactionSystem {
 
     /*changeTransaction method has two variants (method overloading). If the 2nd input argument for changeTransaction is
     a double -> change amount, and if it is an int -> change category*/
+
+    public void findTransaction(String id) {
+        Transaction transaction = null;
+        if (id.startsWith("1")) {
+            transaction = incomeStorage.findTransaction(id);
+        } else if (id.startsWith("2")) {
+            transaction = expenseStorage.findTransaction(id);
+        }
+        if (transaction != null) {
+            System.out.println("\nTransaction found:\n"+Transaction.getTransactionHeader()+"\n"+transaction);
+        } else {
+            System.out.println("\nNo transaction with id "+id+" exists");
+        }
+    }
+
     public void changeTransaction(String id, double amount) {
         Transaction transaction = null;
         if (id.startsWith("1")) {
@@ -174,20 +188,6 @@ public class TransactionSystem {
             }
         } else {
             System.out.println("Input choices not valid");
-        }
-    }
-
-    public void printTransactionsByDate(Date date) {
-        System.out.println("-------------");
-        List<Transaction> transactionList = incomeStorage.getTransactionsByDate(date);
-        transactionList.addAll(expenseStorage.getTransactionsByDate(date));
-        if (!transactionList.isEmpty()) {
-            System.out.println("TRANSACTIONS MADE "+date+"\n"+Transaction.getTransactionHeader());
-            for (Transaction transaction : transactionList) {
-                System.out.println(transaction);
-            }
-        } else {
-            System.out.println("No transactions made "+date);
         }
     }
 

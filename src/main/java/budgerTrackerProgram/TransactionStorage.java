@@ -114,15 +114,6 @@ public class TransactionStorage {
         return transactionSum;
     }
 
-    List<Transaction> getTransactionsByDate(Date date) {
-        List<Transaction> transactionArrayList = new ArrayList<>();
-        for (Transaction transaction : transactionData.get(date.getMonth())) {
-            if (transaction.getDate().getDay() == date.getDay()) {
-                transactionArrayList.add(transaction);
-            }
-        }
-        return transactionArrayList;
-    }
 
 
 
