@@ -1,5 +1,6 @@
 package budgerTrackerProgram;
 
+//Income class, inherits from Transaction
 public class Income extends Transaction {
     private EIncomeCategory category;
 

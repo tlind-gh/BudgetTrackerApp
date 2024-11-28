@@ -3,6 +3,10 @@ package budgerTrackerProgram;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+/*Main class of the program. Handles mainly printing of the menu to console and receiving user input and passing it to
+an instance of the TransactionSystem class. Has some simple static methods to keep the program from crashing if user input
+does not match the variable type it will be assigned to*/
+
 public class BudgetTracker {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -32,6 +36,7 @@ public class BudgetTracker {
             userMenuInput = userInputInt();
 
             switch (userMenuInput) {
+                //prints transactions and balance of printed transactions.
                 case 1:
                     System.out.println("-------------");
                     System.out.println("TRANSACTION HISTORY");
@@ -41,23 +46,29 @@ public class BudgetTracker {
                     transactionSystem.printTransactions(month, userInputInt());
                     break;
 
+                //one or multiple income or expenses
                 case 2:
                     System.out.println("-------------");
                     System.out.println("ADD TRANSACTION");
                     while (true) {
+                        //set date (create an instance of the Date class)
                         System.out.print("Choose date\nMonth: ");
                         month = userInputInt();
                         System.out.print("Day: ");
                         date = transactionSystem.createDate(month, userInputInt());
+                        //if the date input is not valid, the user is booted back to main menu
                         if (date == null) {
                             System.out.println("Returned to main menu due to invalid input.");
                             break;
                         } else {
                             System.out.print("Amount (positive number for income, negative number for expense): ");
                             double amount = userInputDouble();
+                            /*prints Transaction category choices, takes amount as input to determine printing of income
+                            or expense categories*/
                             transactionSystem.printTransactionCategories(amount);
                             transactionSystem.newTransaction(date, amount, userInputInt());
                         }
+                        //choice to add another transaction or return to main menu
                         System.out.println("Add another transaction (any key) or return to main menu (0)");
                         if (sc.nextLine().equals("0")) {
                             break;
@@ -65,6 +76,7 @@ public class BudgetTracker {
                     }
                     break;
 
+                //find a specific transaction by entering the transaction id
                 case 3:
                     System.out.println("-------------");
                     System.out.println("FIND TRANSACTION BY ID");
@@ -72,11 +84,14 @@ public class BudgetTracker {
                     transactionSystem.findTransaction(sc.nextLine());
                     break;
 
+                //change amount or category of an existing transaction, or remove a transaction
                 case 4:
                     System.out.println("-------------");
                     System.out.println("CHANGE OR REMOVE TRANSACTION");
                     System.out.println("Note: use print transaction history to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
+
+                    //give the user the choice to return to main menu if they do not know the id
                     id = sc.nextLine();
                     if (id.equals("0")) {
                         break;
@@ -90,6 +105,8 @@ public class BudgetTracker {
                             break;
 
                         case 2:
+                            /*prints income or expense categories by checking if the transaction id is for an expense
+                            or income and giving the printTransactionCategories() method negative or positive input*/
                             transactionSystem.printTransactionCategories(id.startsWith("1") ? 1 : -1);
                             transactionSystem.changeTransaction(id, userInputInt());
                             break;
@@ -103,6 +120,7 @@ public class BudgetTracker {
                     }
                     break;
 
+                //close program (call methods that trigger printing to file of data)
                 case 5:
                     transactionSystem.closeSystem();
                     System.out.println("Program terminated");

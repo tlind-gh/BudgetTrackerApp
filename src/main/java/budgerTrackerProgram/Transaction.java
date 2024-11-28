@@ -34,7 +34,7 @@ public abstract class Transaction {
     }
 
     /*Static method for getting a String with column headers corresponding to the information in the string
-    returned with the toString() method in the child classes*/
+    returned with the toString() method in the child classes. Used by other classes in methods printing transaction info*/
     static String getTransactionHeader() {
         return String.format("%-20s %-20s %-20s %-20s", "Date","Amount","Category","Transaction ID");
     }

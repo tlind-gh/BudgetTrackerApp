@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 /*Class for writing/reading transaction data from/to file and also add, search, remove and print transactions.
-Can either be of type Income or Expense (set by boolean) and handle one of the two storages.
-Methods from the class are handled via the TransactionSystem class which coordinates the methods for use
-from the Main class*/
+Can either be of type Income or Expense (set by boolean) and handles one of the two storages for a specific user.
+Stores data in a HashMap with month as keys (1-12) and arraylist with the transactions for that month as values
+Methods from the class are handled via the TransactionSystem class which coordinates the methods for use from the Main class*/
 public class TransactionStorage {
     private final Gson gson;
     private final String filepath;
@@ -55,6 +55,9 @@ public class TransactionStorage {
         }
     }
 
+    /*METHODS GENERAL, all methods below are called via the TransactionSystem class which holds two TransactionStorage
+    (one per Transaction type - Expense and Income) and coordinates the use of the two storages*/
+
     /*method which is called by the TransactionSystem() when the user closes the program and which stores
     all non-empty ArrayLists (in the HashMaps) to separate json files*/
     void writeToFile() {
@@ -84,11 +87,13 @@ public class TransactionStorage {
         return transaction;
     }
 
+    //add transaction to the data storage. Called by newTransaction() methods in the TransactionSystem class
     void addTransaction(Transaction transaction) {
         transactionData.get(transaction.getDate().getMonth()).add(transaction);
         System.out.println("\nTransaction added successfully\n"+ Transaction.getTransactionHeader() +"\n" + transaction);
     }
 
+    //remove a transaction based on id. Month of the transaction is removed based.
     void removeTransaction(String id) {
         Transaction transaction = findTransaction(id);
         if (transaction != null) {
@@ -97,6 +102,8 @@ public class TransactionStorage {
         }
     }
 
+    /*prints all transactions from one or multiple months (depending on input argument, which is a list of months)
+    and returns the sum off all printed transactions*/
     double printTransactionsReturnSum(int[] months) {
         double transactionSum = 0;
         boolean printTransactionHeader = true;

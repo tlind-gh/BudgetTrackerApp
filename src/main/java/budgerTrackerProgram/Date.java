@@ -1,8 +1,8 @@
 package budgerTrackerProgram;
 
 public class Date {
-    //custom date class since I had a hard time figuring out how to parse LocalDate for storing to json
-    //year is hard coded to 2024 as this program only handles one calendar year
+    /*custom date class since I had a hard time figuring out how to parse LocalDate for storing to json
+    year is hard coded to 2024 as this program only handles one calendar year*/
     final private int year = 2024;
     final private int month;
     final private int day;
@@ -35,16 +35,12 @@ public class Date {
         return month;
     }
 
-    int getDay() {
-        return day;
-    }
-
     @Override
     public String toString() {
         return year + "-" + String.format("%02d", month) + "-" + String.format("%02d", day);
     }
 
-    //Static method to get a month in letters for digits (e.g., "January" from 1)
+    //Static method to get a month in letters for digits (e.g., "January" from 1). Used in printing methods of other classes.
     public static String getMonthAsString(int month) {
         return switch (month) {
             case 1 -> "January";

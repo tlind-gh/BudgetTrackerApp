@@ -7,8 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
-/*The only class that is called from the main class (BudgetTracker), and which has methods that calls upon other classes.
-Class holds income and expense storage (instances of TransactionStorage) which hold the transaction data*/
+/*Class that has an instance in the main class (BudgetTracker), and which has methods that calls upon methods from other classes.
+Class holds income and expense storage (instances of TransactionStorage) which hold the transaction data. Also responsible
+for giving new transactions a unique ID*/
 public class TransactionSystem {
     private final String filepath_user;
     private final TransactionStorage incomeStorage;
@@ -17,7 +18,7 @@ public class TransactionSystem {
 
     /*constructor checks if there is a user folder (which there should be if the user has used that app before),
     If there is a folder, it loads the last transactionID from a txt file in this folder.
-    Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 10 (starting ID) */
+    Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 1 (starting ID) */
     public TransactionSystem(User user) {
         filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
         File f1 = new File(filepath_user);
@@ -38,10 +39,11 @@ public class TransactionSystem {
         incomeStorage = new TransactionStorage(filepath_user, true);
         expenseStorage = new TransactionStorage(filepath_user, false);
     }
-    /*METHODS: all public methods are called from main class and also checks that arguments are valid for the method.
-    If arguments are not valid it prints a statement to the user informing that arguments are not valid*/
+    /*GENERAL METHODS INFO: all methods are called from main class many call upon methods for the two TransactionStorage instances
+    Checks that arguments (often from user input passed via Main class) are valid for the method
+    and if arguments are not valid it prints a statement to the user informing that arguments are not valid*/
 
-    //create an instance of the Date class and if arguments are not a valid date.
+    //create an instance of the Date class. Includes print statement if arguments are not a valid date.
     public Date createDate(int month, int day) {
         Date date = null;
         try {
@@ -52,10 +54,11 @@ public class TransactionSystem {
         return date;
     }
 
-    /*creates new transaction (income or expense depending on if amount is positive). Called in conjuction w. createDate
-    and printTransactionCategories from the Main class. Sets a unique transaction ID, which holds information of if the
-    transaction is: 1) expense or income (first digit, 1 for income or 2 for expense), 2) transaction month (digit 2 and 3).
-    The nextTransactionID (incremented by 1 after each new transaction) is added to end the id to ensure it is unique.*/
+    /*creates new transaction (income or expense depending on if amount is positive or negative). Called in conjuction
+    w. createDate and printTransactionCategories from the Main class. Sets a unique transaction ID for a new transaction,
+    which holds information of if the transaction is: 1) expense or income (first digit, 1 for income or 2 for expense),
+    2) transaction month (digit 2 and 3). The nextTransactionID (incremented by 1 after each new transaction) is added
+    to end the id to ensure it is unique.*/
     public void newTransaction(Date date, double amount, int categoryNr) {
         if (amount != 0) {
             String id = amount > 0 ? String.format("1%02d%d",date.getMonth(),nextTransactionID) : String.format("2%02d%d",date.getMonth(),nextTransactionID);
@@ -90,12 +93,12 @@ public class TransactionSystem {
         }
     }
 
-    /*GENERAL METHOD INFO changeTransaction AND deleteTransaction():
-    uses id.startsWith to determine the child class of the transaction and calls on income or expenseStorage*/
+    /*METHOD INFO FOR changeTransaction AND deleteTransaction():
+    uses id.startsWith to determine the child class of the transaction based on input ID
+    (and calls on income or expenseStorage) accordingly*/
 
     /*changeTransaction method has two variants (method overloading). If the 2nd input argument for changeTransaction is
     a double -> change amount, and if it is an int -> change category*/
-
     public void findTransaction(String id) {
         Transaction transaction = null;
         if (id.startsWith("1")) {
@@ -191,7 +194,7 @@ public class TransactionSystem {
         }
     }
 
-    //writes the current transactionID to file and calls on the write to file method for the respective transaction systems
+    //writes the current transactionID to file and calls on the write to file method for the respective TransactionStorages
     public void closeSystem() {
         incomeStorage.writeToFile();
         expenseStorage.writeToFile();
