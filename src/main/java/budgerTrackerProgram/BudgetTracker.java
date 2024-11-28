@@ -3,8 +3,6 @@ package budgerTrackerProgram;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-//NB! A BudgetTrackerFileStorage folder NEEDS TO EXIST in main folder for this program to work (this is where the files are stores)
-
 /*Main class of the program. Handles mainly printing of the menu to console and receiving user input and passing it to
 an instance of the TransactionSystem class. Has some simple static methods to keep the program from crashing if user input
 does not match the variable type it will be assigned to*/

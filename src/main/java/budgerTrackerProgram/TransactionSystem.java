@@ -20,7 +20,7 @@ public class TransactionSystem {
     If there is a folder, it loads the last transactionID from a txt file in this folder.
     Otherwise creates the folder and two subfolders (Income and expense) and sets transactionId to 1 (starting ID) */
     public TransactionSystem(User user) {
-        filepath_user = "src/main/BudgetTrackerFileStorage/" + user.userID() + "_" + user.lastName();
+        filepath_user = "src/main/" + user.userID() + "_" + user.lastName();
         File f1 = new File(filepath_user);
         if (f1.mkdir()) {
             new File(filepath_user + "/Income").mkdir();
