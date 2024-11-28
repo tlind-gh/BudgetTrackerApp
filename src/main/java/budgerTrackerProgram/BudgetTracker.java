@@ -3,6 +3,8 @@ package budgerTrackerProgram;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+//NB! A BudgetTrackerFileStorage folder NEEDS TO EXIST in main folder for this program to work (this is where the files are stores)
+
 /*Main class of the program. Handles mainly printing of the menu to console and receiving user input and passing it to
 an instance of the TransactionSystem class. Has some simple static methods to keep the program from crashing if user input
 does not match the variable type it will be assigned to*/
@@ -26,7 +28,7 @@ public class BudgetTracker {
 
         //menu, loops while user has not chosen to exit the application;
         do {
-            System.out.println("\n-------------");
+            System.out.println("\n----------------------------------------");
             System.out.println("MAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
@@ -38,17 +40,18 @@ public class BudgetTracker {
             switch (userMenuInput) {
                 //prints transactions and balance of printed transactions.
                 case 1:
-                    System.out.println("-------------");
+                    System.out.println("\n----------------------------------------");
                     System.out.println("TRANSACTION HISTORY");
                     System.out.print("Choose month (1-12) or zero (0) for all: ");
                     month = userInputInt();
                     System.out.print("Income (1), Expense (2) or All (3): ");
+                    System.out.println();
                     transactionSystem.printTransactions(month, userInputInt());
                     break;
 
                 //one or multiple income or expenses
                 case 2:
-                    System.out.println("-------------");
+                    System.out.println("\n----------------------------------------");
                     System.out.println("ADD TRANSACTION");
                     while (true) {
                         //set date (create an instance of the Date class)
@@ -66,10 +69,12 @@ public class BudgetTracker {
                             /*prints Transaction category choices, takes amount as input to determine printing of income
                             or expense categories*/
                             transactionSystem.printTransactionCategories(amount);
-                            transactionSystem.newTransaction(date, amount, userInputInt());
+                            if (amount != 0) {
+                                transactionSystem.newTransaction(date, amount, userInputInt());
+                            }
                         }
                         //choice to add another transaction or return to main menu
-                        System.out.println("Add another transaction (any key) or return to main menu (0)");
+                        System.out.print("Add another transaction (any key) or return to main menu (0): ");
                         if (sc.nextLine().equals("0")) {
                             break;
                         }
@@ -78,7 +83,7 @@ public class BudgetTracker {
 
                 //find a specific transaction by entering the transaction id
                 case 3:
-                    System.out.println("-------------");
+                    System.out.println("\n----------------------------------------");
                     System.out.println("FIND TRANSACTION BY ID");
                     System.out.print("Specify transaction id: ");
                     transactionSystem.findTransaction(sc.nextLine());
@@ -86,7 +91,7 @@ public class BudgetTracker {
 
                 //change amount or category of an existing transaction, or remove a transaction
                 case 4:
-                    System.out.println("-------------");
+                    System.out.println("\n----------------------------------------");
                     System.out.println("CHANGE OR REMOVE TRANSACTION");
                     System.out.println("Note: use print transaction history to find id");
                     System.out.print("Specify transaction id (or press 0 to return to main menu): ");
@@ -97,10 +102,10 @@ public class BudgetTracker {
                         break;
                     }
 
-                    System.out.println("Change amount (1), change category (2) or remove transaction (3)");
+                    System.out.print("Change amount (1), change category (2) or remove transaction (3): ");
                     switch (userInputInt()) {
                         case 1:
-                            System.out.println("Choose amount: ");
+                            System.out.print("Choose amount: ");
                             transactionSystem.changeTransaction(id, userInputDouble());
                             break;
 

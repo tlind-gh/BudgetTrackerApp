@@ -110,6 +110,7 @@ public class TransactionStorage {
         for (int month : months) {
             String header = printTransactionHeader ? Transaction.getTransactionHeader()+"\n" : "";
             if (!transactionData.get(month).isEmpty()) {
+                //prints column header for the first month that is not empty
                 System.out.print(header);
                 printTransactionHeader = false;
                 for (Transaction transaction : transactionData.get(month)) {

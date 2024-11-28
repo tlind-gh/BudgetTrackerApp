@@ -166,7 +166,7 @@ public class TransactionSystem {
             double incomeSum = 0;
             double expenseSum = 0;
             if (choice == 1 || choice == 3) {
-                System.out.println("-------------");
+                System.out.println("----------------------------------------");
                 System.out.println("INCOME - "+timePeriod.toUpperCase());
                 incomeSum = incomeStorage.printTransactionsReturnSum(listOfMonths);
                 if (incomeSum != 0) {
@@ -176,17 +176,17 @@ public class TransactionSystem {
                 }
             }
             if (choice == 2 || choice == 3) {
-                System.out.println("-------------");
-                System.out.println("EXPENSE - "+timePeriod.toUpperCase());
+                System.out.println("----------------------------------------");
+                System.out.println("EXPENSES - "+timePeriod.toUpperCase());
                 expenseSum = expenseStorage.printTransactionsReturnSum(listOfMonths);
                 if (expenseSum != 0) {
-                    System.out.println("Total expense "+timePeriod+": "+ expenseSum);
+                    System.out.println("Total expenses "+timePeriod+": "+ expenseSum);
                 } else {
                     System.out.println("No expense posts for "+ timePeriod);
                 }
             }
             if (choice == 3) {
-                System.out.println("-------------");
+                System.out.println("----------------------------------------");
                 System.out.println("TOTAL BALANCE " + timePeriod.toUpperCase() + ": " + (incomeSum + expenseSum));
             }
         } else {
