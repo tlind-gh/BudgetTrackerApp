@@ -26,7 +26,7 @@ public class BudgetTracker {
 
         //menu, loops while user has not chosen to exit the application;
         do {
-            System.out.println("-------------");
+            System.out.println("\n-------------");
             System.out.println("MAIN MENU");
             System.out.println("1. Show transaction history");
             System.out.println("2. Add new transaction");
